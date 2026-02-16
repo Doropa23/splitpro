@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanilhaPro - Sistema Avançado de Divisão de Planilhas</title>
+    <title>PlanilhaPro - Sistema de Divisão de Planilhas</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -19,9 +19,6 @@
             --card-bg: #ffffff;
             --border: #eef2f6;
             --shadow: rgba(0, 0, 0, 0.08);
-            --premium: #e67e22;
-            --basic: #27ae60;
-            --free: #3498db;
             --surface: #f8fafc;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
@@ -63,6 +60,17 @@
             z-index: 10;
         }
         
+        .login-container {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            width: 95%;
+            max-width: 400px;
+            padding: 40px;
+            position: relative;
+            z-index: 10;
+        }
+        
         header {
             text-align: center;
             margin-bottom: 30px;
@@ -81,6 +89,13 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.5px;
+        }
+        
+        h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
         }
         
         .subtitle {
@@ -122,25 +137,12 @@
             font-size: 0.75rem;
             font-weight: 600;
             margin-left: 6px;
-        }
-        
-        .free-badge {
-            background: var(--free);
-            color: white;
-        }
-        
-        .basic-badge {
-            background: var(--basic);
-            color: white;
-        }
-        
-        .premium-badge {
             background: var(--premium);
             color: white;
         }
         
-        .logout-btn, .login-btn, .account-btn {
-            background: var(--secondary);
+        .logout-btn {
+            background: var(--danger);
             color: white;
             border: none;
             border-radius: var(--radius-md);
@@ -158,24 +160,95 @@
             font-weight: 500;
         }
         
-        .logout-btn:hover, .login-btn:hover, .account-btn:hover {
-            background: #2980b9;
+        .logout-btn:hover {
+            background: #c0392b;
             transform: translateY(-2px);
         }
         
-        .operation-counter {
-            margin-top: 5px;
-            font-size: 0.8rem;
-            color: var(--danger);
-            font-weight: 600;
-            background: rgba(231, 76, 60, 0.1);
-            padding: 4px 8px;
+        .session-timer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ffeb3b;
+            color: #333;
+            padding: 8px 15px;
             border-radius: 20px;
-            display: inline-block;
+            font-weight: 600;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: none;
         }
         
         .app-container {
             display: block;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-group input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--focus);
+        }
+        
+        .login-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .login-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .login-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .login-info i {
+            color: var(--secondary);
+            margin-right: 5px;
         }
         
         .card {
@@ -405,18 +478,6 @@
         #resetBtn:hover {
             background: #e55a5a;
             border-color: #e55a5a;
-        }
-        
-        #signupBtn {
-            background: #4CAF50;
-            color: white;
-            border: 1px solid #4CAF50;
-            display: flex;
-        }
-        
-        #signupBtn:hover {
-            background: #45a049;
-            border-color: #45a049;
         }
         
         .result-container {
@@ -701,254 +762,6 @@
             font-style: italic;
         }
         
-        .session-timer {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #ffeb3b;
-            color: #333;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-            z-index: 100;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: none;
-        }
-        
-        .access-message {
-            background: var(--danger);
-            color: white;
-            padding: 15px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-        }
-        
-        .trial-message {
-            background: #9b59b6;
-            color: white;
-            padding: 15px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-        }
-        
-        .welcome-message {
-            background: var(--secondary);
-            color: white;
-            padding: 15px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-        }
-        
-        .history-panel {
-            background: var(--light);
-            border-radius: var(--radius-sm);
-            padding: 20px;
-            margin-top: 20px;
-            border: 1px solid var(--border);
-            display: none;
-        }
-        
-        .history-panel h3 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .history-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .history-item {
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-        }
-        
-        .history-item:last-child {
-            border-bottom: none;
-        }
-        
-        .upgrade-banner {
-            background: linear-gradient(90deg, var(--secondary), var(--primary));
-            color: white;
-            padding: 15px 20px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            display: none;
-        }
-        
-        .upgrade-banner button {
-            background: #ff9f43;
-            color: white;
-            border: none;
-            border-radius: var(--radius-sm);
-            padding: 10px 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .upgrade-banner button:hover {
-            background: #ff7f00;
-            transform: translateY(-2px);
-        }
-        
-        .signup-modal, .login-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .signup-content, .login-content {
-            background-color: white;
-            border-radius: var(--radius-lg);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-            width: 90%;
-            max-width: 500px;
-            padding: 30px;
-            position: relative;
-        }
-        
-        .signup-header, .login-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .signup-header h2, .login-header h2 {
-            color: var(--primary);
-            font-size: 1.6rem;
-            margin-bottom: 10px;
-        }
-        
-        .signup-body, .login-body {
-            padding: 20px 0;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group.full-width {
-            grid-column: span 2;
-        }
-        
-        .signup-footer, .login-footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        
-        .signup-footer button, .login-footer button {
-            padding: 12px 24px;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-        }
-        
-        #cancelSignup, #cancelLogin {
-            background: #eef2f6;
-            color: var(--text-secondary);
-        }
-        
-        #confirmSignup, #confirmLogin {
-            background: var(--secondary);
-            color: white;
-        }
-        
-        .payment-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .payment-content {
-            background-color: white;
-            border-radius: var(--radius-lg);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-            width: 90%;
-            max-width: 500px;
-            padding: 30px;
-            position: relative;
-        }
-        
-        .payment-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .payment-header h2 {
-            color: var(--primary);
-            font-size: 1.6rem;
-            margin-bottom: 10px;
-        }
-        
-        .plan-option {
-            background: var(--light);
-            border-radius: var(--radius-sm);
-            padding: 20px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            border: 2px solid var(--border);
-            transition: var(--transition);
-        }
-        
-        .plan-option:hover {
-            border-color: var(--secondary);
-            background: #f0f7ff;
-        }
-        
-        .plan-option.selected {
-            border-color: var(--secondary);
-            background: #e3f0ff;
-            box-shadow: 0 0 0 3px var(--focus);
-        }
-        
-        .payment-body {
-            padding: 20px 0;
-        }
-        
-        .payment-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        
         .file-confirm-modal {
             display: none;
             position: fixed;
@@ -1089,62 +902,6 @@
             background: white;
         }
         
-        .premium-feature {
-            position: relative;
-        }
-        
-        .premium-feature::after {
-            content: "Recurso Premium";
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--premium);
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        
-        .basic-feature {
-            position: relative;
-        }
-        
-        .basic-feature::after {
-            content: "Recurso Básico";
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--basic);
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        
-        .restricted {
-            opacity: 0.6;
-            position: relative;
-            cursor: not-allowed;
-        }
-        
-        .restricted::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            cursor: not-allowed;
-        }
-        
-        .restricted .file-input-button {
-            background: #f5f5f5;
-            color: #999;
-        }
-        
         .test-data-btn {
             background: #9b59b6;
             color: white;
@@ -1219,141 +976,6 @@
         .alert-cancel {
             background: #eef2f6;
             color: var(--text-secondary);
-        }
-        
-        .account-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .account-content {
-            background-color: white;
-            border-radius: var(--radius-lg);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-            width: 90%;
-            max-width: 500px;
-            padding: 25px;
-            position: relative;
-        }
-        
-        .account-header {
-            background: linear-gradient(to right, var(--secondary), #4a89dc);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top-left-radius: var(--radius-lg);
-            border-top-right-radius: var(--radius-lg);
-            margin: -25px -25px 15px -25px;
-        }
-        
-        .account-header h2 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .account-body {
-            padding: 15px 0;
-        }
-        
-        .account-info {
-            margin-bottom: 15px;
-        }
-        
-        .account-section {
-            margin-bottom: 15px;
-        }
-        
-        .account-section h3 {
-            color: var(--primary);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
-            font-size: 1.1rem;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        
-        .info-item {
-            background: var(--light);
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            font-size: 0.9rem;
-        }
-        
-        .info-item strong {
-            display: block;
-            color: var(--secondary);
-            margin-bottom: 5px;
-            font-size: 0.85rem;
-        }
-        
-        .info-item span {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        
-        .account-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .account-btn {
-            flex: 1;
-            min-width: 160px;
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-        
-        #upgradeAccountBtn {
-            background: var(--basic);
-            color: white;
-        }
-        
-        #downgradeAccountBtn {
-            background: var(--secondary);
-            color: white;
-        }
-        
-        #cancelAccountBtn {
-            background: var(--danger);
-            color: white;
-        }
-        
-        #closeAccountModal {
-            background: var(--gray);
-            color: white;
         }
         
         /* Modos de operação */
@@ -1477,12 +1099,6 @@
                 margin-bottom: 15px;
             }
             
-            .upgrade-banner {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-            
             .file-confirm-buttons {
                 flex-direction: column;
             }
@@ -1507,26 +1123,6 @@
                 width: 100%;
             }
             
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-group.full-width {
-                grid-column: span 1;
-            }
-            
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .account-actions {
-                flex-direction: column;
-            }
-            
-            .account-btn {
-                width: 100%;
-            }
-            
             .operation-mode {
                 flex-direction: column;
             }
@@ -1539,27 +1135,22 @@
         @media (max-width: 480px) {
             .user-info {
                 min-width: 100%;
-            justify-content: center;
-            text-align: center;
-            flex-direction: column;
-            gap: 4px;
-            padding: 10px 0;
-            margin-bottom: 5px;
-            border-bottom: 1px dashed #ddd;
-            width: 100%;
-            max-width: 100%;
-        }
+                justify-content: center;
+                text-align: center;
+                flex-direction: column;
+                gap: 4px;
+                padding: 10px 0;
+                margin-bottom: 5px;
+                border-bottom: 1px dashed #ddd;
+                width: 100%;
+                max-width: 100%;
+            }
             
             .user-badge {
                 margin: 0 auto;
             }
             
-            .operation-counter {
-                margin-top: 5px;
-                text-align: center;
-            }
-            
-            .logout-btn, .login-btn, .account-btn {
+            .logout-btn {
                 width: 100%;
                 margin-top: 5px;
             }
@@ -1572,7 +1163,7 @@
 </head>
 <body>
     <div class="session-timer" id="sessionTimer">
-        <i class="fas fa-clock"></i> Sessão expira em: <span id="timer">30:00</span>
+        <i class="fas fa-clock"></i> Sessão expira em: <span id="timer">15:00</span>
     </div>
     
     <div class="alert-modal" id="alertModal">
@@ -1587,59 +1178,45 @@
         </div>
     </div>
     
-    <div class="alert-modal" id="cancelSubscriptionModal">
-        <div class="alert-content">
-            <div class="alert-icon">
-                <i class="fas fa-exclamation-triangle" style="color:#e67e22"></i>
+    <!-- Tela de Login -->
+    <div class="login-container" id="loginContainer">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <i class="fas fa-file-excel" style="font-size: 4rem; color: var(--secondary);"></i>
+            <h2>PlanilhaPro</h2>
+            <p class="subtitle">Faça login para acessar o sistema</p>
+        </div>
+        
+        <div class="login-form">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Usuário</label>
+                <input type="text" id="username" placeholder="Digite seu usuário" value="">
             </div>
-            <div class="alert-message">
-                Tem certeza que deseja cancelar sua assinatura? Você voltará ao plano gratuito.
+            
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Senha</label>
+                <input type="password" id="password" placeholder="Digite sua senha" value="">
             </div>
-            <div class="alert-buttons">
-                <button class="alert-btn alert-cancel" id="cancelSubscriptionCancel">Não</button>
-                <button class="alert-btn alert-confirm" id="cancelSubscriptionConfirm">Sim</button>
-            </div>
+            
+            <button class="login-btn" id="loginButton">
+                <i class="fas fa-sign-in-alt"></i> Entrar no Sistema
+            </button>
+            
+            
         </div>
     </div>
     
-    <div class="container app-container" id="appContainer">
+    <!-- Aplicação Principal -->
+    <div class="container app-container" id="appContainer" style="display: none;">
         <div class="user-info-container">
             <div class="user-info">
                 <i class="fas fa-user"></i> 
-                <span id="userEmailDisplay">Usuário Visitante</span>
-                <span class="user-badge free-badge" id="userBadge">Gratuito</span>
-                <div class="operation-counter" id="operationCounter">Operações: 0/3</div>
+                <span id="userDisplay">admin</span>
+                <span class="user-badge" id="userBadge">Administrador</span>
             </div>
             
-            <button class="logout-btn" id="logoutBtn" style="display: none;">
+            <button class="logout-btn" id="logoutBtn">
                 <i class="fas fa-sign-out-alt"></i> Sair
             </button>
-            
-            <button class="account-btn" id="accountBtn" style="display: none;">
-                <i class="fas fa-user-cog"></i> Minha Conta
-            </button>
-            
-            <button class="login-btn" id="loginBtn">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </button>
-        </div>
-        
-        <div class="welcome-message free-welcome" id="welcomeMessage">
-            <h3><i class="fas fa-gift"></i> Bem-vindo ao PlanilhaPro!</h3>
-            <p>Você tem direito a 3 operações gratuitas por mês antes de precisar se cadastrar</p>
-        </div>
-        
-        <div class="access-message" id="accessMessage">
-            <i class="fas fa-exclamation-triangle"></i> Para efetuar qualquer operação, você deve se cadastrar no site.
-        </div>
-        <div class="trial-message" id="trialMessage"></div>
-        
-        <div class="upgrade-banner" id="upgradeBanner">
-            <div>
-                <h3><i class="fas fa-crown"></i> Quer mais recursos?</h3>
-                <p>Atualize para o plano Premium e desbloqueie todas as funcionalidades!</p>
-            </div>
-            <button id="upgradeBtn">Atualizar Agora</button>
         </div>
         
         <header>
@@ -1707,7 +1284,7 @@
                             <input type="radio" id="splitByRows" name="splitMethod" value="rows">
                             <i class="fas fa-grip-lines"></i> Linhas por Coluna
                         </label>
-                        <label class="radio-option restricted" id="manualOption">
+                        <label class="radio-option" id="manualOption">
                             <input type="radio" id="splitManual" name="splitMethod" value="manual">
                             <i class="fas fa-sliders-h"></i> Distribuição Manual
                         </label>
@@ -1833,7 +1410,7 @@
                             <input type="radio" id="bothSplitByRows" name="bothSplitMethod" value="rows">
                             <i class="fas fa-grip-lines"></i> Linhas por Coluna
                         </label>
-                        <label class="radio-option restricted" id="bothManualOption">
+                        <label class="radio-option" id="bothManualOption">
                             <input type="radio" id="bothSplitManual" name="bothSplitMethod" value="manual">
                             <i class="fas fa-sliders-h"></i> Distribuição Manual
                         </label>
@@ -1950,9 +1527,6 @@
                 <button id="resetBtn">
                     <i class="fas fa-trash-alt"></i> Limpar Processo
                 </button>
-                <button id="signupBtn">
-                    <i class="fas fa-user-plus"></i> Cadastrar
-                </button>
             </div>
         </div>
         
@@ -1984,12 +1558,6 @@
             <p style="margin-top: 10px; color: #5d9cec; font-weight: 500; text-align: center;">
                 <i class="fas fa-info-circle"></i> Clique em "Visualizar Tabela" para ver os dados divididos
             </p>
-        </div>
-        
-        <div class="history-panel" id="historyPanel">
-            <h3><i class="fas fa-history"></i> Últimas Operações</h3>
-            <div class="history-list" id="historyList">
-            </div>
         </div>
         
         <div class="instructions">
@@ -2040,155 +1608,6 @@
         </div>
     </div>
     
-    <!-- Modal de cadastro -->
-    <div class="signup-modal" id="signupModal">
-        <div class="signup-content">
-            <div class="signup-header">
-                <h2><i class="fas fa-user-plus"></i> Criar Nova Conta</h2>
-                <p>Preencha os dados abaixo para se cadastrar</p>
-            </div>
-            <div class="signup-body">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="signupName">Nome Completo</label>
-                        <input type="text" id="signupName" placeholder="Seu nome completo">
-                    </div>
-                    <div class="form-group">
-                        <label for="signupUsername">Nome de Usuário</label>
-                        <input type="text" id="signupUsername" placeholder="Nome de usuário">
-                    </div>
-                    <div class="form-group">
-                        <label for="signupCompany">Empresa</label>
-                        <input type="text" id="signupCompany" placeholder="Nome da empresa">
-                    </div>
-                    <div class="form-group">
-                        <label for="signupPhone">Telefone</label>
-                        <input type="text" id="signupPhone" placeholder="(00) 00000-0000">
-                    </div>
-                    <div class="form-group">
-                        <label for="signupCountry">País</label>
-                        <select id="signupCountry">
-                            <option value="">Selecione seu país</option>
-                            <option value="Brasil">Brasil</option>
-                            <option value="Portugal">Portugal</option>
-                        </select>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="signupEmail">E-mail</label>
-                        <input type="email" id="signupEmail" placeholder="seu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="signupPassword">Senha</label>
-                        <input type="password" id="signupPassword" placeholder="Mínimo 6 caracteres">
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirmar Senha</label>
-                        <input type="password" id="confirmPassword" placeholder="Digite novamente">
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Plano:</label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="signupPlan" value="free" checked>
-                                <i class="fas fa-user"></i> Gratuito (10 operações/mês)
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="signupPlan" value="basic">
-                                <i class="fas fa-star"></i> Básico (100 operações/mês)
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="signupPlan" value="premium">
-                                <i class="fas fa-crown"></i> Premium (Ilimitado)
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="signup-footer">
-                <button id="cancelSignup">Cancelar</button>
-                <button id="confirmSignup">Criar Conta</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal de login -->
-    <div class="login-modal" id="loginModal">
-        <div class="login-content">
-            <div class="login-header">
-                <h2><i class="fas fa-sign-in-alt"></i> Login</h2>
-                <p>Digite suas credenciais para acessar</p>
-            </div>
-            <div class="login-body">
-                <div class="form-group">
-                    <label for="loginEmail">E-mail</label>
-                    <input type="email" id="loginEmail" placeholder="seu@email.com">
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword">Senha</label>
-                    <input type="password" id="loginPassword" placeholder="Sua senha">
-                </div>
-                <div class="form-group" style="text-align: center; margin-top: 20px;">
-                    <a href="#" style="color: #3498db; text-decoration: none;">Esqueceu sua senha?</a>
-                </div>
-            </div>
-            <div class="login-footer">
-                <button id="cancelLogin">Cancelar</button>
-                <button id="confirmLogin">Entrar</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal de pagamento -->
-    <div class="payment-modal" id="paymentModal">
-        <div class="payment-content">
-            <div class="payment-header">
-                <h2><i class="fas fa-credit-card"></i> Atualizar Plano</h2>
-                <p>Selecione seu plano e informe os dados de pagamento</p>
-            </div>
-            <div class="payment-body">
-                <div class="form-group">
-                    <label>Selecione o plano:</label>
-                    <div class="plan-option" onclick="selectPaymentPlan('basic')">
-                        <h3><i class="fas fa-star"></i> Plano Básico</h3>
-                        <p>R$ 29,90/mês - 100 operações mensais</p>
-                        <p>Recursos avançados de divisão</p>
-                    </div>
-                    <div class="plan-option" onclick="selectPaymentPlan('premium')">
-                        <h3><i class="fas fa-crown"></i> Plano Premium</h3>
-                        <p>R$ 59,90/mês - Operações ilimitadas</p>
-                        <p>Todos os recursos, suporte prioritário</p>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="cardNumber">Número do Cartão</label>
-                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000">
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="cardExpiry">Validade (MM/AA)</label>
-                        <input type="text" id="cardExpiry" placeholder="MM/AA">
-                    </div>
-                    <div class="form-group">
-                        <label for="cardCVC">CVC</label>
-                        <input type="text" id="cardCVC" placeholder="000" maxlength="3">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <button class="test-data-btn" id="fillTestData">
-                        <i class="fas fa-vial"></i> Preencher dados de teste
-                    </button>
-                </div>
-            </div>
-            <div class="payment-footer">
-                <button id="cancelPayment">Cancelar</button>
-                <button id="confirmPayment">Confirmar Pagamento</button>
-            </div>
-        </div>
-    </div>
-    
     <!-- Modal de confirmação de arquivo -->
     <div class="file-confirm-modal" id="fileConfirmModal">
         <div class="file-confirm-content">
@@ -2213,177 +1632,37 @@
         </div>
     </div>
     
-    <!-- Modal Minha Conta -->
-    <div class="account-modal" id="accountModal">
-        <div class="account-content">
-            <div class="account-header">
-                <h2><i class="fas fa-user-circle"></i> Minha Conta</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="account-body">
-                <div class="account-section">
-                    <h3><i class="fas fa-user"></i> Informações Pessoais</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <strong>Nome</strong>
-                            <span id="accountName">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Usuário</strong>
-                            <span id="accountUsername">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>E-mail</strong>
-                            <span id="accountEmail">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Empresa</strong>
-                            <span id="accountCompany">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Telefone</strong>
-                            <span id="accountPhone">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>País</strong>
-                            <span id="accountCountry">-</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="account-section">
-                    <h3><i class="fas fa-chart-line"></i> Informações da Conta</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <strong>Plano Atual</strong>
-                            <span id="accountPlan">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Status</strong>
-                            <span id="accountStatus">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Data de Início</strong>
-                            <span id="accountStartDate">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Próximo Pagamento</strong>
-                            <span id="accountNextPayment">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Operações Usadas</strong>
-                            <span id="accountOperations">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Limite de Operações</strong>
-                            <span id="accountOperationsLimit">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Total de Operações</strong>
-                            <span id="accountTotalOperations">-</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Último Acesso</strong>
-                            <span id="accountLastAccess">-</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="account-actions">
-                    <button class="account-btn" id="upgradeAccountBtn">
-                        <i class="fas fa-arrow-up"></i> Atualizar Plano
-                    </button>
-                    <button class="account-btn" id="downgradeAccountBtn">
-                        <i class="fas fa-arrow-down"></i> Downgrade para Gratuito
-                    </button>
-                    <button class="account-btn" id="cancelAccountBtn">
-                        <i class="fas fa-ban"></i> Cancelar Assinatura
-                    </button>
-                    <button class="account-btn" id="closeAccountModal">
-                        <i class="fas fa-times"></i> Fechar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <script>
-        // Limites por plano
-        const PLAN_LIMITS = {
-            guest: { operations: 3, rows: 500, features: ['columns', 'rows'] },
-            free: { operations: 10, rows: 1000, features: ['columns', 'rows', 'header'] },
-            basic: { operations: 100, rows: 10000, features: ['columns', 'rows', 'manual', 'header'] },
-            premium: { operations: Infinity, rows: Infinity, features: ['all'] }
-        };
+        // Variáveis da aplicação
+        let rawData = [];
+        let fullData = [];
+        let dividedColumns = [];
+        let fileName = "";
+        let originalHeaders = [];
+        let originalColumns = 0;
+        let hasHeader = true;
+        let currentProcessedHeaders = [];
+        let numberingData = [];
+        let generatedData = [];
+        let processedData = [];
+        let processedHeaders = [];
+        let currentMode = 'division'; // Modo atual: division, numbering, both
         
-        // Estado do usuário
-        let userState = {
-            role: 'guest',
-            email: null,
-            name: null,
-            username: null,
-            company: null,
-            phone: null,
-            country: null,
-            operationsUsed: 0,
-            totalOperations: 0,
-            lastOperationMonth: null,
-            sessionTimer: null,
-            timerInterval: null,
-            history: [],
-            startDate: null,
-            lastLogin: null
-        };
+        // Timer de inatividade
+        let inactivityTimer;
+        const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutos em milissegundos
+        let sessionTimerInterval;
+        let timeLeft = 15 * 60; // 15 minutos em segundos
         
         // Elementos de UI
         const operationCounter = document.getElementById('operationCounter');
-        const accessMessage = document.getElementById('accessMessage');
         const sessionTimerEl = document.getElementById('sessionTimer');
         const timerElement = document.getElementById('timer');
-        const userEmailDisplay = document.getElementById('userEmailDisplay');
+        const userDisplay = document.getElementById('userDisplay');
         const userBadgeElement = document.getElementById('userBadge');
-        const upgradeBanner = document.getElementById('upgradeBanner');
-        const signupBtn = document.getElementById('signupBtn');
-        const loginBtn = document.getElementById('loginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const accountBtn = document.getElementById('accountBtn');
         const processBtn = document.getElementById('processBtn');
-        const signupModal = document.getElementById('signupModal');
-        const loginModal = document.getElementById('loginModal');
-        const cancelSignup = document.getElementById('cancelSignup');
-        const confirmSignup = document.getElementById('confirmSignup');
-        const cancelLogin = document.getElementById('cancelLogin');
-        const confirmLogin = document.getElementById('confirmLogin');
-        const paymentModal = document.getElementById('paymentModal');
-        const cancelPayment = document.getElementById('cancelPayment');
-        const confirmPayment = document.getElementById('confirmPayment');
-        const upgradeBtn = document.getElementById('upgradeBtn');
-        const fillTestData = document.getElementById('fillTestData');
-        const cancelSubscriptionModal = document.getElementById('cancelSubscriptionModal');
-        const cancelSubscriptionCancel = document.getElementById('cancelSubscriptionCancel');
-        const cancelSubscriptionConfirm = document.getElementById('cancelSubscriptionConfirm');
-        const welcomeMessage = document.getElementById('welcomeMessage');
         const viewRawTableBtn = document.getElementById('viewRawTableBtn');
         const fileActionButtons = document.getElementById('fileActionButtons');
-        const accountModal = document.getElementById('accountModal');
-        const accountName = document.getElementById('accountName');
-        const accountUsername = document.getElementById('accountUsername');
-        const accountEmail = document.getElementById('accountEmail');
-        const accountCompany = document.getElementById('accountCompany');
-        const accountPhone = document.getElementById('accountPhone');
-        const accountCountry = document.getElementById('accountCountry');
-        const accountPlan = document.getElementById('accountPlan');
-        const accountStatus = document.getElementById('accountStatus');
-        const accountStartDate = document.getElementById('accountStartDate');
-        const accountNextPayment = document.getElementById('accountNextPayment');
-        const accountOperations = document.getElementById('accountOperations');
-        const accountOperationsLimit = document.getElementById('accountOperationsLimit');
-        const accountLastAccess = document.getElementById('accountLastAccess');
-        const accountTotalOperations = document.getElementById('accountTotalOperations');
-        const upgradeAccountBtn = document.getElementById('upgradeAccountBtn');
-        const downgradeAccountBtn = document.getElementById('downgradeAccountBtn');
-        const cancelAccountBtn = document.getElementById('cancelAccountBtn');
-        const closeAccountModal = document.getElementById('closeAccountModal');
         const fileInput = document.getElementById('fileInput');
         const fileNameElement = document.getElementById('fileName');
         const rowCountElement = document.getElementById('rowCount');
@@ -2428,23 +1707,11 @@
         const confirmFilePreview = document.getElementById('confirmFilePreview');
         const confirmFileOk = document.getElementById('confirmFileOk');
         const confirmFileName = document.getElementById('confirmFileName');
-        const historyPanel = document.getElementById('historyPanel');
-        const historyList = document.getElementById('historyList');
         const fileInputButton = document.querySelector('.file-input-button');
         const alertModal = document.getElementById('alertModal');
         const alertMessage = document.getElementById('alertMessage');
         const alertConfirm = document.getElementById('alertConfirm');
         const alertIcon = document.getElementById('alertIcon');
-        const signupName = document.getElementById('signupName');
-        const signupUsername = document.getElementById('signupUsername');
-        const signupCompany = document.getElementById('signupCompany');
-        const signupPhone = document.getElementById('signupPhone');
-        const signupCountry = document.getElementById('signupCountry');
-        const signupEmail = document.getElementById('signupEmail');
-        const signupPassword = document.getElementById('signupPassword');
-        const confirmPassword = document.getElementById('confirmPassword');
-        const loginEmail = document.getElementById('loginEmail');
-        const loginPassword = document.getElementById('loginPassword');
         const fileSection = document.getElementById('fileSection');
         
         // Novos elementos para modos de operação
@@ -2476,20 +1743,13 @@
         const barcodeSource = document.getElementById('barcodeSource');
         const qrcodeSource = document.getElementById('qrcodeSource');
         
-        // Variáveis da aplicação
-        let rawData = [];
-        let fullData = [];
-        let dividedColumns = [];
-        let fileName = "";
-        let originalHeaders = [];
-        let originalColumns = 0;
-        let hasHeader = true;
-        let currentProcessedHeaders = [];
-        let numberingData = [];
-        let generatedData = [];
-        let processedData = [];
-        let processedHeaders = [];
-        let currentMode = 'division'; // Modo atual: division, numbering, both
+        // Elementos de login
+        const loginContainer = document.getElementById('loginContainer');
+        const appContainer = document.getElementById('appContainer');
+        const loginButton = document.getElementById('loginButton');
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const logoutBtn = document.getElementById('logoutBtn');
         
         // Função para mostrar alertas personalizados
         function showAlert(message, type = 'info') {
@@ -2517,6 +1777,115 @@
         alertConfirm.addEventListener('click', function() {
             alertModal.style.display = 'none';
             document.body.style.overflow = 'auto';
+        });
+        
+        // Função para resetar o timer de inatividade
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(logout, INACTIVITY_LIMIT);
+            
+            // Resetar o timer visual
+            timeLeft = 15 * 60;
+            updateTimerDisplay();
+            
+            // Iniciar/continuar a contagem regressiva visual
+            if (!sessionTimerInterval) {
+                startSessionTimer();
+            }
+        }
+        
+        // Função para iniciar o timer visual
+        function startSessionTimer() {
+            sessionTimerEl.style.display = 'block';
+            
+            sessionTimerInterval = setInterval(() => {
+                timeLeft--;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(sessionTimerInterval);
+                    sessionTimerInterval = null;
+                    updateTimerDisplay();
+                } else {
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+        
+        // Função para atualizar o display do timer
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+        
+        // Função de logout
+        function logout() {
+            // Parar timers
+            clearTimeout(inactivityTimer);
+            clearInterval(sessionTimerInterval);
+            sessionTimerInterval = null;
+            
+            // Esconder timer
+            sessionTimerEl.style.display = 'none';
+            
+            // Mostrar tela de login e esconder app
+            loginContainer.style.display = 'block';
+            appContainer.style.display = 'none';
+            
+            // Limpar dados
+            resetProcess();
+            
+            // Limpar campos de login
+            username.value = '';
+            password.value = '';
+            
+            showAlert('Sessão encerrada por inatividade. Faça login novamente.', 'warning');
+        }
+        
+        // Event listeners para resetar o timer de inatividade
+        document.addEventListener('mousemove', resetInactivityTimer);
+        document.addEventListener('keypress', resetInactivityTimer);
+        document.addEventListener('click', resetInactivityTimer);
+        document.addEventListener('scroll', resetInactivityTimer);
+        
+        // Função de login
+        function doLogin() {
+            const user = username.value;
+            const pass = password.value;
+            
+            if (user === 'admin' && pass === 'admin123') {
+                loginContainer.style.display = 'none';
+                appContainer.style.display = 'block';
+                userDisplay.textContent = user;
+                
+                // Iniciar timer de inatividade
+                resetInactivityTimer();
+                
+                showAlert('Login realizado com sucesso! Bem-vindo ao sistema.', 'success');
+            } else {
+                showAlert('Usuário ou senha incorretos!', 'error');
+            }
+        }
+        
+        // Evento de login
+        loginButton.addEventListener('click', doLogin);
+        
+        // Permitir login com Enter
+        password.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                doLogin();
+            }
+        });
+        
+        username.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                password.focus();
+            }
+        });
+        
+        // Evento de logout manual
+        logoutBtn.addEventListener('click', function() {
+            logout();
         });
         
         // Atualizar botão de arquivo
@@ -2580,155 +1949,6 @@
             updateRadioStyles();
         }
         
-        // Função para atualizar a interface conforme o plano
-        function updateUIForPlan() {
-            const plan = userState.role;
-            const limits = PLAN_LIMITS[plan];
-            
-            updateExportCounter();
-            
-            if (plan === 'guest' || plan === 'free') {
-                manualOption.classList.add('restricted');
-                document.getElementById('additionalColumnsSection').classList.add('restricted');
-                exportTxtMacModal.classList.add('restricted');
-                historyPanel.style.display = 'none';
-                
-                manualOption.querySelector('input').disabled = true;
-                document.getElementById('autoNumberEnabled').disabled = true;
-                
-                upgradeBanner.style.display = 'flex';
-            } 
-            else if (plan === 'basic') {
-                manualOption.classList.remove('restricted');
-                manualOption.querySelector('input').disabled = false;
-                
-                document.getElementById('additionalColumnsSection').classList.add('restricted');
-                exportTxtMacModal.classList.add('restricted');
-                historyPanel.style.display = 'block';
-                
-                document.getElementById('autoNumberEnabled').disabled = true;
-                
-                upgradeBanner.style.display = 'flex';
-            } 
-            else if (plan === 'premium') {
-                manualOption.classList.remove('restricted');
-                document.getElementById('additionalColumnsSection').classList.remove('restricted');
-                exportTxtMacModal.classList.remove('restricted');
-                historyPanel.style.display = 'block';
-                
-                manualOption.querySelector('input').disabled = false;
-                document.getElementById('autoNumberEnabled').disabled = false;
-                
-                upgradeBanner.style.display = 'none';
-            }
-            
-            if (plan === 'free') {
-                upgradeBanner.querySelector('h3').innerHTML = '<i class="fas fa-crown"></i> Atualize para Premium!';
-                upgradeBanner.querySelector('p').textContent = 'Obtenha todos os recursos avançados e limites ampliados';
-            }
-            
-            updateWelcomeMessage();
-        }
-        
-        // Atualizar mensagem de boas-vindas
-        function updateWelcomeMessage() {
-            welcomeMessage.style.display = 'block';
-            welcomeMessage.className = 'welcome-message';
-            
-            switch(userState.role) {
-                case 'guest':
-                    welcomeMessage.classList.add('free-welcome');
-                    welcomeMessage.innerHTML = `
-                        <h3><i class="fas fa-gift"></i> Bem-vindo ao PlanilhaPro!</h3>
-                        <p>Você tem direito a 3 operações gratuitas por mês antes de precisar se cadastrar</p>
-                    `;
-                    break;
-                case 'free':
-                    welcomeMessage.classList.add('free-welcome');
-                    welcomeMessage.innerHTML = `
-                        <h3><i class="fas fa-user"></i> Plano Gratuito</h3>
-                        <p>Você tem direito a 10 operações por mês. Atualize para mais recursos!</p>
-                    `;
-                    break;
-                case 'basic':
-                    welcomeMessage.classList.add('basic-welcome');
-                    welcomeMessage.innerHTML = `
-                        <h3><i class="fas fa-star"></i> Plano Básico</h3>
-                        <p>Bem-vindo ${userState.name || ''}! Você tem direito a 100 operações por mês.</p>
-                    `;
-                    break;
-                case 'premium':
-                    welcomeMessage.classList.add('premium-welcome');
-                    welcomeMessage.innerHTML = `
-                        <h3><i class="fas fa-crown"></i> Plano Premium</h3>
-                        <p>Bem-vindo ${userState.name || ''}! Você tem acesso ilimitado a todos os recursos.</p>
-                    `;
-                    break;
-            }
-        }
-        
-        // Atualizar contador de exportações
-        function updateExportCounter() {
-            const plan = userState.role;
-            const limit = PLAN_LIMITS[plan].operations;
-            
-            if (plan === 'premium') {
-                operationCounter.textContent = `Operações ilimitadas`;
-            } else {
-                operationCounter.textContent = `Operações: ${userState.operationsUsed}/${limit}`;
-            }
-        }
-        
-        // Verificar se uma operação é permitida
-        function checkOperation() {
-            const plan = userState.role;
-            const limit = PLAN_LIMITS[plan].operations;
-            const rowLimit = PLAN_LIMITS[plan].rows;
-            
-            if (rawData.length > rowLimit) {
-                showAlert(`Seu plano ${plan} suporta no máximo ${rowLimit} linhas. Atualize para continuar.`, 'error');
-                return false;
-            }
-            
-            if (plan === 'guest') {
-                const now = new Date();
-                const currentMonth = now.getMonth();
-                
-                if (userState.lastOperationMonth !== currentMonth) {
-                    userState.operationsUsed = 0;
-                    userState.lastOperationMonth = currentMonth;
-                    updateExportCounter();
-                }
-            }
-            
-            if (plan !== 'premium' && userState.operationsUsed >= limit) {
-                accessMessage.innerHTML = 
-                    `<i class="fas fa-exclamation-triangle"></i> Você atingiu o limite de ${limit} operações do plano ${plan}.`;
-                accessMessage.style.display = 'block';
-                processBtn.disabled = true;
-                return false;
-            }
-            
-            return true;
-        }
-        
-        // Mostrar aplicação ao carregar
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            userState.lastOperationMonth = now.getMonth();
-            
-            updateUIForPlan();
-            
-            const savedUser = JSON.parse(localStorage.getItem('planilhaProCurrentUser'));
-            if (savedUser) {
-                loginUser(savedUser);
-            }
-            
-            // Inicializar modo
-            updateModeDisplay();
-            clearAllFields();
-        });
-        
         // Função para limpar todo o processo
         function resetProcess() {
             rawData = [];
@@ -2753,10 +1973,6 @@
             
             clearAllFields();
             
-            accessMessage.style.display = 'none';
-            trialMessage.style.display = 'none';
-            processBtn.disabled = false;
-            
             headerToggle.style.display = 'none';
             
             updateFileButton();
@@ -2764,367 +1980,6 @@
             // Re-popular selects com cabeçalhos vazios
             populateColumnSelects([]);
         }
-        
-        // Encerrar sessão
-        logoutBtn.addEventListener('click', function() {
-            resetProcess();
-            
-            const now = new Date();
-            userState = {
-                role: 'guest',
-                email: null,
-                name: null,
-                username: null,
-                company: null,
-                phone: null,
-                country: null,
-                operationsUsed: 0,
-                totalOperations: 0,
-                lastOperationMonth: now.getMonth(),
-                sessionTimer: null,
-                timerInterval: null,
-                history: [],
-                startDate: null,
-                lastLogin: null
-            };
-            
-            clearInterval(userState.timerInterval);
-            sessionTimerEl.style.display = 'none';
-            
-            logoutBtn.style.display = 'none';
-            accountBtn.style.display = 'none';
-            loginBtn.style.display = 'flex';
-            userEmailDisplay.textContent = 'Usuário Visitante';
-            userBadgeElement.textContent = 'Gratuito';
-            userBadgeElement.className = 'user-badge free-badge';
-            updateUIForPlan();
-            signupBtn.style.display = 'flex';
-            
-            populateColumnSelects([]);
-        });
-        
-        // Timer de sessão
-        function startSessionTimer(minutes) {
-            sessionTimerEl.style.display = 'block';
-            let timeLeft = minutes * 60;
-            
-            userState.timerInterval = setInterval(() => {
-                timeLeft--;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(userState.timerInterval);
-                    sessionExpired();
-                    return;
-                }
-                
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            }, 1000);
-        }
-        
-        // Sessão expirada
-        function sessionExpired() {
-            accessMessage.textContent = 'Sua sessão expirou. Faça login novamente para continuar.';
-            accessMessage.style.display = 'block';
-            accessMessage.style.backgroundColor = '#f44336';
-            
-            document.getElementById('processBtn').disabled = true;
-            document.getElementById('viewTableBtn').disabled = true;
-            document.getElementById('viewRawTableBtn').disabled = true;
-        }
-        
-        // Mostrar modal de cadastro
-        signupBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            signupModal.style.display = 'flex';
-        });
-        
-        // Mostrar modal de login
-        loginBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            loginModal.style.display = 'flex';
-        });
-        
-        // Fechar modal de cadastro
-        cancelSignup.addEventListener('click', function() {
-            signupModal.style.display = 'none';
-        });
-        
-        // Fechar modal de login
-        cancelLogin.addEventListener('click', function() {
-            loginModal.style.display = 'none';
-        });
-        
-        // Validar cadastro
-        function validateSignup(name, username, email, password, confirmPassword) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            if (!name) {
-                showAlert('Por favor, insira seu nome completo.', 'error');
-                return false;
-            }
-            
-            if (!username) {
-                showAlert('Por favor, insira um nome de usuário.', 'error');
-                return false;
-            }
-            
-            if (!emailRegex.test(email)) {
-                showAlert('Por favor, insira um e-mail válido.', 'error');
-                return false;
-            }
-            
-            if (password.length < 6) {
-                showAlert('A senha deve ter pelo menos 6 caracteres.', 'error');
-                return false;
-            }
-            
-            if (password !== confirmPassword) {
-                showAlert('As senhas não coincidem. Por favor, digite novamente.', 'error');
-                return false;
-            }
-            
-            return true;
-        }
-        
-        // Salvar usuário no localStorage
-        function saveUser(name, username, company, phone, country, email, password, plan) {
-            const users = JSON.parse(localStorage.getItem('planilhaProUsers')) || [];
-            
-            if (users.some(user => user.email === email)) {
-                showAlert('Este e-mail já está cadastrado. Por favor, faça login.', 'error');
-                return false;
-            }
-            
-            if (users.some(user => user.username === username)) {
-                showAlert('Este nome de usuário já está em uso. Por favor, escolha outro.', 'error');
-                return false;
-            }
-            
-            users.push({
-                name: name,
-                username: username,
-                company: company,
-                phone: phone,
-                country: country,
-                email: email,
-                password: password,
-                plan: plan,
-                joined: new Date().toISOString(),
-                lastLogin: new Date().toISOString(),
-                totalOperations: 0,
-                operationsUsed: 0
-            });
-            
-            localStorage.setItem('planilhaProUsers', JSON.stringify(users));
-            localStorage.setItem('planilhaProCurrentUser', JSON.stringify({
-                name: name,
-                username: username,
-                company: company,
-                phone: phone,
-                country: country,
-                email: email,
-                plan: plan,
-                startDate: new Date().toISOString(),
-                lastLogin: new Date().toISOString(),
-                totalOperations: 0,
-                operationsUsed: 0
-            }));
-            return true;
-        }
-        
-        // Fazer login do usuário
-        function loginUser(userData) {
-            userState.role = userData.plan;
-            userState.email = userData.email;
-            userState.name = userData.name;
-            userState.username = userData.username;
-            userState.company = userData.company;
-            userState.phone = userData.phone;
-            userState.country = userData.country;
-            userState.lastLogin = new Date().toISOString();
-            userState.operationsUsed = userData.operationsUsed || 0;
-            userState.totalOperations = userData.totalOperations || 0;
-            userState.startDate = userData.startDate || new Date().toISOString();
-            
-            userEmailDisplay.textContent = userData.email;
-            userBadgeElement.textContent = 
-                userData.plan === 'free' ? 'Gratuito' : 
-                userData.plan === 'basic' ? 'Básico' : 'Premium';
-                
-            userBadgeElement.className = 'user-badge ' + 
-                (userData.plan === 'free' ? 'free-badge' : 
-                 userData.plan === 'basic' ? 'basic-badge' : 'premium-badge');
-            
-            updateUIForPlan();
-            logoutBtn.style.display = 'flex';
-            accountBtn.style.display = 'flex';
-            loginBtn.style.display = 'none';
-            signupBtn.style.display = 'none';
-            
-            accessMessage.style.display = 'none';
-            trialMessage.style.display = 'none';
-            
-            processBtn.disabled = false;
-            
-            showAlert(`Bem-vindo de volta ao PlanilhaPro ${userData.plan === 'free' ? 'Gratuito' : userData.plan}!`, 'success');
-        }
-        
-        // Confirmar cadastro
-        confirmSignup.addEventListener('click', function() {
-            const name = signupName.value;
-            const username = signupUsername.value;
-            const company = signupCompany.value;
-            const phone = signupPhone.value;
-            const country = signupCountry.value;
-            const email = signupEmail.value;
-            const password = signupPassword.value;
-            const confirmPass = confirmPassword.value;
-            const plan = document.querySelector('input[name="signupPlan"]:checked').value;
-            
-            if (!validateSignup(name, username, email, password, confirmPass)) return;
-            
-            if (!saveUser(name, username, company, phone, country, email, password, plan)) return;
-            
-            const savedUser = JSON.parse(localStorage.getItem('planilhaProCurrentUser'));
-            loginUser(savedUser);
-            
-            signupModal.style.display = 'none';
-        });
-        
-        // Confirmar login
-        confirmLogin.addEventListener('click', function() {
-            const email = loginEmail.value;
-            const password = loginPassword.value;
-            
-            if (!email || !password) {
-                showAlert('Por favor, preencha todos os campos.', 'error');
-                return;
-            }
-            
-            const users = JSON.parse(localStorage.getItem('planilhaProUsers')) || [];
-            const user = users.find(u => u.email === email && u.password === password);
-            
-            if (user) {
-                loginUser(user);
-                loginModal.style.display = 'none'; // Fechar modal após login
-            } else {
-                showAlert('E-mail ou senha incorretos. Tente novamente.', 'error');
-            }
-        });
-        
-        // Mostrar modal de pagamento
-        upgradeBtn.addEventListener('click', function() {
-            paymentModal.style.display = 'flex';
-        });
-        
-        // Fechar modal de pagamento
-        cancelPayment.addEventListener('click', function() {
-            paymentModal.style.display = 'none';
-        });
-        
-        // Selecionar plano de pagamento
-        function selectPaymentPlan(plan) {
-            document.querySelectorAll('.plan-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            
-            if (plan === 'basic') {
-                document.querySelector('.plan-option:nth-child(1)').classList.add('selected');
-            } else if (plan === 'premium') {
-                document.querySelector('.plan-option:nth-child(2)').classList.add('selected');
-            }
-            
-            document.getElementById('confirmPayment').dataset.plan = plan;
-        }
-        
-        // Preencher dados de teste para pagamento
-        fillTestData.addEventListener('click', function() {
-            document.getElementById('cardNumber').value = '4242 4242 4242 4242';
-            document.getElementById('cardExpiry').value = '12/28';
-            document.getElementById('cardCVC').value = '123';
-        });
-        
-        // Confirmar pagamento
-        confirmPayment.addEventListener('click', function() {
-            const plan = this.dataset.plan;
-            const cardNumber = document.getElementById('cardNumber').value;
-            const cardExpiry = document.getElementById('cardExpiry').value;
-            const cardCVC = document.getElementById('cardCVC').value;
-            
-            if (!cardNumber || cardNumber.replace(/\s/g, '').length !== 16) {
-                showAlert('Por favor, insira um número de cartão válido (16 dígitos).', 'error');
-                return;
-            }
-            
-            if (!cardExpiry || !cardExpiry.match(/^\d{2}\/\d{2}$/)) {
-                showAlert('Por favor, insira uma validade no formato MM/AA.', 'error');
-                return;
-            }
-            
-            if (!cardCVC || cardCVC.length !== 3) {
-                showAlert('Por favor, insira um CVC válido (3 dígitos).', 'error');
-                return;
-            }
-            
-            showAlert(`Pagamento processado com sucesso! Seu plano ${plan === 'basic' ? 'Básico' : 'Premium'} foi ativado.`, 'success');
-            
-            const users = JSON.parse(localStorage.getItem('planilhaProUsers')) || [];
-            const userIndex = users.findIndex(user => user.email === userState.email);
-            
-            if (userIndex !== -1) {
-                users[userIndex].plan = plan;
-                localStorage.setItem('planilhaProUsers', JSON.stringify(users));
-                
-                const currentUser = JSON.parse(localStorage.getItem('planilhaProCurrentUser'));
-                currentUser.plan = plan;
-                localStorage.setItem('planilhaProCurrentUser', JSON.stringify(currentUser));
-                
-                userState.role = plan;
-                
-                userBadgeElement.textContent = 
-                    plan === 'basic' ? 'Básico' : 'Premium';
-                    
-                userBadgeElement.className = 'user-badge ' + 
-                    (plan === 'basic' ? 'basic-badge' : 'premium-badge');
-                
-                updateUIForPlan();
-            }
-            
-            paymentModal.style.display = 'none';
-        });
-        
-        // Modal de confirmação de arquivo
-        confirmFileCancel.addEventListener('click', function() {
-            fileConfirmModal.style.display = 'none';
-            document.getElementById('fileInput').value = '';
-            fileNameElement.textContent = 'Nenhum arquivo selecionado';
-            rowCountElement.textContent = '0';
-            headerToggle.style.display = 'none';
-            updateFileButton();
-        });
-        
-        // Visualizar arquivo no modal de confirmação
-        confirmFilePreview.addEventListener('click', function() {
-            fileConfirmModal.style.display = 'none';
-            openModal(true);
-        });
-        
-        confirmFileOk.addEventListener('click', function() {
-            fileConfirmModal.style.display = 'none';
-        });
-        
-        // Ativar/desativar configurações de numeração automática
-        autoNumberEnabled.addEventListener('change', function() {
-            if (this.checked) {
-                autoNumberConfig.style.display = 'block';
-                autoNumberToggle.classList.add('selected');
-            } else {
-                autoNumberConfig.style.display = 'none';
-                autoNumberToggle.classList.remove('selected');
-            }
-        });
         
         // Radio button styling
         function updateRadioStyles() {
@@ -3412,10 +2267,39 @@
             openModal(true);
         });
         
+        // Modal de confirmação de arquivo
+        confirmFileCancel.addEventListener('click', function() {
+            fileConfirmModal.style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            fileNameElement.textContent = 'Nenhum arquivo selecionado';
+            rowCountElement.textContent = '0';
+            headerToggle.style.display = 'none';
+            updateFileButton();
+        });
+        
+        // Visualizar arquivo no modal de confirmação
+        confirmFilePreview.addEventListener('click', function() {
+            fileConfirmModal.style.display = 'none';
+            openModal(true);
+        });
+        
+        confirmFileOk.addEventListener('click', function() {
+            fileConfirmModal.style.display = 'none';
+        });
+        
+        // Ativar/desativar configurações de numeração automática
+        autoNumberEnabled.addEventListener('change', function() {
+            if (this.checked) {
+                autoNumberConfig.style.display = 'block';
+                autoNumberToggle.classList.add('selected');
+            } else {
+                autoNumberConfig.style.display = 'none';
+                autoNumberToggle.classList.remove('selected');
+            }
+        });
+        
         // Process data
         processBtn.addEventListener('click', function() {
-            if (!checkOperation()) return;
-            
             const hasFile = rawData.length > 0;
             
             if (currentMode === 'division' && !hasFile) {
@@ -3442,21 +2326,6 @@
             }
             
             viewTableBtn.style.display = 'flex';
-            
-            userState.operationsUsed++;
-            userState.totalOperations++;
-            updateExportCounter();
-            
-            const operation = {
-                type: 'Processamento',
-                date: new Date().toLocaleString(),
-                rows: processedData.length,
-                columns: dividedColumns.length,
-                method: currentMode
-            };
-            
-            userState.history.unshift(operation);
-            updateHistory();
         });
         
         function processDivisionMode() {
@@ -3944,132 +2813,8 @@
             }
         }
         
-        // Atualizar histórico
-        function updateHistory() {
-            historyList.innerHTML = '';
-            
-            userState.history.slice(0, 5).forEach(op => {
-                const item = document.createElement('div');
-                item.className = 'history-item';
-                item.innerHTML = `
-                    <div>${op.type}</div>
-                    <div>${op.date}</div>
-                    <div>${op.rows} linhas</div>
-                `;
-                historyList.appendChild(item);
-            });
-        }
-        
         // Botão de reset
         resetBtn.addEventListener('click', resetProcess);
-        
-        // Botão Minha Conta
-        accountBtn.addEventListener('click', function() {
-            accountName.textContent = userState.name || '-';
-            accountUsername.textContent = userState.username || '-';
-            accountEmail.textContent = userState.email || '-';
-            accountCompany.textContent = userState.company || '-';
-            accountPhone.textContent = userState.phone || '-';
-            accountCountry.textContent = userState.country || '-';
-            
-            accountPlan.textContent = 
-                userState.role === 'free' ? 'Gratuito' : 
-                userState.role === 'basic' ? 'Básico' : 'Premium';
-            
-            accountStatus.textContent = 'Ativo';
-            
-            const startDate = userState.startDate ? new Date(userState.startDate) : new Date();
-            accountStartDate.textContent = startDate.toLocaleDateString('pt-BR');
-            
-            const nextPayment = new Date(startDate);
-            nextPayment.setMonth(nextPayment.getMonth() + 1);
-            accountNextPayment.textContent = nextPayment.toLocaleDateString('pt-BR');
-            
-            accountOperations.textContent = userState.operationsUsed;
-            
-            const limit = userState.role === 'premium' ? 'Ilimitado' : PLAN_LIMITS[userState.role].operations;
-            accountOperationsLimit.textContent = limit;
-            
-            accountTotalOperations.textContent = userState.totalOperations;
-            
-            const lastAccess = userState.lastLogin ? new Date(userState.lastLogin) : new Date();
-            accountLastAccess.textContent = lastAccess.toLocaleString('pt-BR');
-            
-            accountModal.style.display = 'flex';
-        });
-        
-        // Fechar modal Minha Conta
-        closeAccountModal.addEventListener('click', function() {
-            accountModal.style.display = 'none';
-        });
-        
-        // Atualizar plano na conta
-        upgradeAccountBtn.addEventListener('click', function() {
-            accountModal.style.display = 'none';
-            paymentModal.style.display = 'flex';
-        });
-        
-        // Downgrade para gratuito
-        downgradeAccountBtn.addEventListener('click', function() {
-            if (confirm('Tem certeza que deseja fazer downgrade para o plano gratuito?')) {
-                const users = JSON.parse(localStorage.getItem('planilhaProUsers')) || [];
-                const userIndex = users.findIndex(user => user.email === userState.email);
-                
-                if (userIndex !== -1) {
-                    users[userIndex].plan = 'free';
-                    localStorage.setItem('planilhaProUsers', JSON.stringify(users));
-                    const currentUser = JSON.parse(localStorage.getItem('planilhaProCurrentUser'));
-                    currentUser.plan = 'free';
-                    localStorage.setItem('planilhaProCurrentUser', JSON.stringify(currentUser));
-                    
-                    userState.role = 'free';
-                    
-                    userBadgeElement.textContent = 'Gratuito';
-                    userBadgeElement.className = 'user-badge free-badge';
-                    
-                    updateUIForPlan();
-                    
-                    showAlert('Seu plano foi alterado para Gratuito com sucesso!', 'success');
-                    accountModal.style.display = 'none';
-                }
-            }
-        });
-        
-        // Cancelar assinatura
-        cancelAccountBtn.addEventListener('click', function() {
-            cancelSubscriptionModal.style.display = 'flex';
-            accountModal.style.display = 'none';
-        });
-        
-        // Cancelar cancelamento de assinatura
-        cancelSubscriptionCancel.addEventListener('click', function() {
-            cancelSubscriptionModal.style.display = 'none';
-        });
-        
-        // Confirmar cancelamento de assinatura
-        cancelSubscriptionConfirm.addEventListener('click', function() {
-            const users = JSON.parse(localStorage.getItem('planilhaProUsers')) || [];
-            const userIndex = users.findIndex(user => user.email === userState.email);
-            
-            if (userIndex !== -1) {
-                users[userIndex].plan = 'free';
-                localStorage.setItem('planilhaProUsers', JSON.stringify(users));
-                const currentUser = JSON.parse(localStorage.getItem('planilhaProCurrentUser'));
-                currentUser.plan = 'free';
-                localStorage.setItem('planilhaProCurrentUser', JSON.stringify(currentUser));
-                
-                userState.role = 'free';
-                
-                userBadgeElement.textContent = 'Gratuito';
-                userBadgeElement.className = 'user-badge free-badge';
-                
-                updateUIForPlan();
-                
-                showAlert('Sua assinatura foi cancelada. Agora você está no plano gratuito.', 'success');
-            }
-            
-            cancelSubscriptionModal.style.display = 'none';
-        });
         
         // Funções para controle dos modos de operação
         function updateModeDisplay() {
