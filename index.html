@@ -1,0 +1,4136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanilhaPro - Sistema Avançado de Divisão de Planilhas</title>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #f8f9fa;
+            --dark: #1a2a4a;
+            --gray: #6c7a89;
+            --card-bg: #ffffff;
+            --border: #eef2f6;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --premium: #e67e22;
+            --basic: #27ae60;
+            --free: #3498db;
+            --surface: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --focus: rgba(52, 152, 219, 0.2);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.25s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background: var(--surface);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .container {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            width: 95%;
+            max-width: 1200px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        
+        h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin: 15px 0 5px;
+            line-height: 1.5;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .user-info-container {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            background: rgba(241, 245, 249, 0.7);
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(4px);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+            max-width: 100%;
+            font-size: 0.9rem;
+        }
+        
+        .user-info .user-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        
+        .free-badge {
+            background: var(--free);
+            color: white;
+        }
+        
+        .basic-badge {
+            background: var(--basic);
+            color: white;
+        }
+        
+        .premium-badge {
+            background: var(--premium);
+            color: white;
+        }
+        
+        .logout-btn, .login-btn, .account-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            height: 36px;
+            min-width: 100px;
+            justify-content: center;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        
+        .logout-btn:hover, .login-btn:hover, .account-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .operation-counter {
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: var(--danger);
+            font-weight: 600;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 4px 8px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .app-container {
+            display: block;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-md);
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-title {
+            font-size: 1.35rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+        
+        .card-title i {
+            color: var(--secondary);
+            width: 30px;
+            height: 30px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .file-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .file-input-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-input-button {
+            display: block;
+            padding: 14px 25px;
+            background: rgba(241, 245, 249, 0.7);
+            color: var(--secondary);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px dashed #c2dcff;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .file-loaded .file-input-button {
+            background: #e3f0ff;
+            border-color: var(--secondary);
+        }
+        
+        .file-input-button:hover {
+            background: #e3f0ff;
+            border-color: var(--secondary);
+        }
+        
+        .file-info {
+            background: rgba(241, 245, 249, 0.7);
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            min-width: 180px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+            border: 1px solid #e1ecfb;
+            font-size: 0.95rem;
+        }
+        
+        .file-info span {
+            display: block;
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin-top: 5px;
+            font-weight: 700;
+        }
+        
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--light);
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            flex: 1;
+            min-width: 180px;
+        }
+        
+        .radio-option:hover {
+            border-color: var(--secondary);
+            background: #f0f7ff;
+        }
+        
+        .radio-option.selected {
+            border-color: var(--secondary);
+            background: #e3f0ff;
+            box-shadow: 0 0 0 3px var(--focus);
+        }
+        
+        input[type="radio"], input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            background-color: white;
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+        
+        input[type="number"]:focus, input[type="text"]:focus, select:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--focus);
+        }
+        
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        button {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+        
+        #processBtn {
+            background: var(--success);
+            color: white;
+            border: 1px solid var(--success);
+        }
+        
+        #processBtn:hover {
+            background: #2da58a;
+            border-color: #2da58a;
+        }
+        
+        #viewTableBtn, #viewRawTableBtn {
+            background: #ac92ec;
+            color: white;
+            border: 1px solid #ac92ec;
+            display: none;
+        }
+        
+        #viewTableBtn:hover, #viewRawTableBtn:hover {
+            background: #9b82db;
+            border-color: #9b82db;
+        }
+        
+        #resetBtn {
+            background: var(--danger);
+            color: white;
+            border: 1px solid var(--danger);
+        }
+        
+        #resetBtn:hover {
+            background: #e55a5a;
+            border-color: #e55a5a;
+        }
+        
+        #signupBtn {
+            background: #4CAF50;
+            color: white;
+            border: 1px solid #4CAF50;
+            display: flex;
+        }
+        
+        #signupBtn:hover {
+            background: #45a049;
+            border-color: #45a049;
+        }
+        
+        .result-container {
+            display: none;
+            margin-top: 15px;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .result-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            background: #f0f7ff;
+            padding: 18px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            border: 1px solid #e1ecfb;
+            transition: var(--transition);
+        }
+        
+        .info-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .info-box h3 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .info-box p {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .instructions {
+            background: var(--light);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            border: 1px solid var(--border);
+        }
+        
+        .instructions h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 22px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            position: relative;
+        }
+        
+        .instructions li::before {
+            content: "•";
+            color: var(--secondary);
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .header-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--light);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            margin-top: 15px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .header-toggle:hover {
+            border-color: var(--secondary);
+            background: #f0f7ff;
+        }
+        
+        .header-toggle.selected {
+            border-color: var(--secondary);
+            background: #e3f0ff;
+            box-shadow: 0 0 0 3px var(--focus);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(0.95);
+            animation: modalOpen 0.3s forwards;
+        }
+        
+        @keyframes modalOpen {
+            to { transform: scale(1); }
+        }
+        
+        .modal-header {
+            background: linear-gradient(to right, var(--secondary), #4a89dc);
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 0 10px;
+            transition: var(--transition);
+            line-height: 1;
+            opacity: 0.8;
+        }
+        
+        .close-modal:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .modal-body {
+            padding: 20px;
+            overflow: auto;
+            flex-grow: 1;
+        }
+        
+        .modal-table-container {
+            overflow-x: auto;
+            max-height: 60vh;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+        
+        .modal-table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+            font-size: 0.9rem;
+        }
+        
+        .modal-table-container th {
+            background: #f0f7ff;
+            color: var(--primary);
+            padding: 12px 10px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #e1ecfb;
+        }
+        
+        .modal-table-container td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        
+        .modal-table-container tr:nth-child(even) {
+            background-color: var(--light);
+        }
+        
+        .modal-table-container tr:hover {
+            background-color: #f0f7ff;
+        }
+        
+        .modal-footer {
+            padding: 18px 25px;
+            background-color: var(--light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            background: #fff;
+            color: var(--text-primary);
+            border-color: #d1d8e0;
+        }
+        
+        .modal-btn:hover {
+            background: #f1f5f9;
+        }
+        
+        #exportExcelModal {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        
+        #exportTxtModal, #exportTxtMacModal {
+            background: var(--secondary);
+            border-color: var(--secondary);
+            color: white;
+        }
+        
+        #closeModalBtn {
+            background: white;
+            border-color: var(--gray);
+            color: var(--gray);
+        }
+        
+        .file-name {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+            font-style: italic;
+        }
+        
+        .session-timer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ffeb3b;
+            color: #333;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .access-message {
+            background: var(--danger);
+            color: white;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .trial-message {
+            background: #9b59b6;
+            color: white;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .welcome-message {
+            background: var(--secondary);
+            color: white;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .history-panel {
+            background: var(--light);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--border);
+            display: none;
+        }
+        
+        .history-panel h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .upgrade-banner {
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 15px 20px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            display: none;
+        }
+        
+        .upgrade-banner button {
+            background: #ff9f43;
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .upgrade-banner button:hover {
+            background: #ff7f00;
+            transform: translateY(-2px);
+        }
+        
+        .signup-modal, .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .signup-content, .login-content {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .signup-header, .login-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .signup-header h2, .login-header h2 {
+            color: var(--primary);
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+        
+        .signup-body, .login-body {
+            padding: 20px 0;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
+        .signup-footer, .login-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .signup-footer button, .login-footer button {
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+        
+        #cancelSignup, #cancelLogin {
+            background: #eef2f6;
+            color: var(--text-secondary);
+        }
+        
+        #confirmSignup, #confirmLogin {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .payment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .payment-content {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .payment-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .payment-header h2 {
+            color: var(--primary);
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+        
+        .plan-option {
+            background: var(--light);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: var(--transition);
+        }
+        
+        .plan-option:hover {
+            border-color: var(--secondary);
+            background: #f0f7ff;
+        }
+        
+        .plan-option.selected {
+            border-color: var(--secondary);
+            background: #e3f0ff;
+            box-shadow: 0 0 0 3px var(--focus);
+        }
+        
+        .payment-body {
+            padding: 20px 0;
+        }
+        
+        .payment-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .file-confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .file-confirm-content {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+            text-align: center;
+        }
+        
+        .file-confirm-icon {
+            font-size: 4rem;
+            color: var(--success);
+            margin-bottom: 20px;
+        }
+        
+        .file-confirm-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            word-break: break-all;
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+        }
+        
+        .file-confirm-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .file-confirm-btn {
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #confirmFileCancel {
+            background: #eef2f6;
+            color: var(--text-secondary);
+        }
+        
+        #confirmFilePreview {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        #confirmFileOk {
+            background: var(--success);
+            color: white;
+        }
+        
+        .auto-number-section {
+            background: var(--light);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--border);
+        }
+        
+        .auto-number-section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .auto-number-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .number-range {
+            background: #e3f0ff;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            margin-top: 10px;
+            font-size: 0.9rem;
+            display: block;
+        }
+        
+        .add-columns-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .add-column {
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            border: 1px solid #e1ecfb;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .add-column h4 {
+            margin-bottom: 10px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .column-select {
+            margin-top: 8px;
+            width: 100%;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid #e1ecfb;
+            background: white;
+        }
+        
+        .premium-feature {
+            position: relative;
+        }
+        
+        .premium-feature::after {
+            content: "Recurso Premium";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--premium);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .basic-feature {
+            position: relative;
+        }
+        
+        .basic-feature::after {
+            content: "Recurso Básico";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--basic);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .restricted {
+            opacity: 0.6;
+            position: relative;
+            cursor: not-allowed;
+        }
+        
+        .restricted::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            cursor: not-allowed;
+        }
+        
+        .restricted .file-input-button {
+            background: #f5f5f5;
+            color: #999;
+        }
+        
+        .test-data-btn {
+            background: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .test-data-btn:hover {
+            background: #8e44ad;
+        }
+        
+        .alert-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .alert-content {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .alert-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .alert-message {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .alert-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .alert-btn {
+            padding: 12px 30px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+            min-width: 120px;
+        }
+        
+        .alert-confirm {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .alert-cancel {
+            background: #eef2f6;
+            color: var(--text-secondary);
+        }
+        
+        .account-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .account-content {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            position: relative;
+        }
+        
+        .account-header {
+            background: linear-gradient(to right, var(--secondary), #4a89dc);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: var(--radius-lg);
+            border-top-right-radius: var(--radius-lg);
+            margin: -25px -25px 15px -25px;
+        }
+        
+        .account-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .account-body {
+            padding: 15px 0;
+        }
+        
+        .account-info {
+            margin-bottom: 15px;
+        }
+        
+        .account-section {
+            margin-bottom: 15px;
+        }
+        
+        .account-section h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .info-item {
+            background: var(--light);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        
+        .info-item strong {
+            display: block;
+            color: var(--secondary);
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .info-item span {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .account-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .account-btn {
+            flex: 1;
+            min-width: 160px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        #upgradeAccountBtn {
+            background: var(--basic);
+            color: white;
+        }
+        
+        #downgradeAccountBtn {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        #cancelAccountBtn {
+            background: var(--danger);
+            color: white;
+        }
+        
+        #closeAccountModal {
+            background: var(--gray);
+            color: white;
+        }
+        
+        /* Modos de operação */
+        .operation-mode {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .mode-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--light);
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            flex: 1;
+            min-width: 180px;
+        }
+        
+        .mode-option:hover {
+            border-color: var(--secondary);
+            background: #f0f7ff;
+        }
+        
+        .mode-option.selected {
+            border-color: var(--secondary);
+            background: #e3f0ff;
+            box-shadow: 0 0 0 3px var(--focus);
+        }
+        
+        .mode-section {
+            display: none;
+        }
+        
+        .mode-section.active {
+            display: block;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Grid compacto */
+        .compact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .compact-group {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        
+        .compact-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+        
+        .compact-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e1ecfb;
+            border-radius: var(--radius-sm);
+            background: white;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .file-container {
+                flex-direction: column;
+            }
+            
+            .radio-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-title {
+                font-size: 1.2rem;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+            
+            .modal-footer {
+                flex-wrap: wrap;
+            }
+            
+            .modal-btn {
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .user-info-container {
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            
+            .upgrade-banner {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .file-confirm-buttons {
+                flex-direction: column;
+            }
+            
+            .auto-number-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .add-columns-container {
+                flex-direction: column;
+            }
+            
+            .alert-content {
+                padding: 20px;
+            }
+            
+            .alert-buttons {
+                flex-direction: column;
+            }
+            
+            .alert-btn {
+                width: 100%;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .account-actions {
+                flex-direction: column;
+            }
+            
+            .account-btn {
+                width: 100%;
+            }
+            
+            .operation-mode {
+                flex-direction: column;
+            }
+            
+            .compact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .user-info {
+                min-width: 100%;
+            justify-content: center;
+            text-align: center;
+            flex-direction: column;
+            gap: 4px;
+            padding: 10px 0;
+            margin-bottom: 5px;
+            border-bottom: 1px dashed #ddd;
+            width: 100%;
+            max-width: 100%;
+        }
+            
+            .user-badge {
+                margin: 0 auto;
+            }
+            
+            .operation-counter {
+                margin-top: 5px;
+                text-align: center;
+            }
+            
+            .logout-btn, .login-btn, .account-btn {
+                width: 100%;
+                margin-top: 5px;
+            }
+            
+            .mode-option {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="session-timer" id="sessionTimer">
+        <i class="fas fa-clock"></i> Sessão expira em: <span id="timer">30:00</span>
+    </div>
+    
+    <div class="alert-modal" id="alertModal">
+        <div class="alert-content">
+            <div class="alert-icon" id="alertIcon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="alert-message" id="alertMessage"></div>
+            <div class="alert-buttons">
+                <button class="alert-btn alert-confirm" id="alertConfirm">OK</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="alert-modal" id="cancelSubscriptionModal">
+        <div class="alert-content">
+            <div class="alert-icon">
+                <i class="fas fa-exclamation-triangle" style="color:#e67e22"></i>
+            </div>
+            <div class="alert-message">
+                Tem certeza que deseja cancelar sua assinatura? Você voltará ao plano gratuito.
+            </div>
+            <div class="alert-buttons">
+                <button class="alert-btn alert-cancel" id="cancelSubscriptionCancel">Não</button>
+                <button class="alert-btn alert-confirm" id="cancelSubscriptionConfirm">Sim</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container app-container" id="appContainer">
+        <div class="user-info-container">
+            <div class="user-info">
+                <i class="fas fa-user"></i> 
+                <span id="userEmailDisplay">Usuário Visitante</span>
+                <span class="user-badge free-badge" id="userBadge">Gratuito</span>
+                <div class="operation-counter" id="operationCounter">Operações: 0/3</div>
+            </div>
+            
+            <button class="logout-btn" id="logoutBtn" style="display: none;">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </button>
+            
+            <button class="account-btn" id="accountBtn" style="display: none;">
+                <i class="fas fa-user-cog"></i> Minha Conta
+            </button>
+            
+            <button class="login-btn" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </div>
+        
+        <div class="welcome-message free-welcome" id="welcomeMessage">
+            <h3><i class="fas fa-gift"></i> Bem-vindo ao PlanilhaPro!</h3>
+            <p>Você tem direito a 3 operações gratuitas por mês antes de precisar se cadastrar</p>
+        </div>
+        
+        <div class="access-message" id="accessMessage">
+            <i class="fas fa-exclamation-triangle"></i> Para efetuar qualquer operação, você deve se cadastrar no site.
+        </div>
+        <div class="trial-message" id="trialMessage"></div>
+        
+        <div class="upgrade-banner" id="upgradeBanner">
+            <div>
+                <h3><i class="fas fa-crown"></i> Quer mais recursos?</h3>
+                <p>Atualize para o plano Premium e desbloqueie todas as funcionalidades!</p>
+            </div>
+            <button id="upgradeBtn">Atualizar Agora</button>
+        </div>
+        
+        <header>
+            <h1 style="margin-top: 20px;"><i class="fas fa-file-excel"></i> Divisor de Planilhas</h1>
+            <p class="subtitle">Carregue uma planilha Excel ou gere números diretamente</p>
+        </header>
+        
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-file-excel"></i> Carregar e Configurar</h2>
+            
+            <!-- Seleção de modo de operação -->
+            <div class="operation-mode">
+                <label class="mode-option selected" id="divisionModeOption">
+                    <input type="radio" id="divisionMode" name="operationMode" value="division" checked>
+                    <i class="fas fa-columns"></i> Divisão de Colunas
+                </label>
+                <label class="mode-option" id="numberingModeOption">
+                    <input type="radio" id="numberingMode" name="operationMode" value="numbering">
+                    <i class="fas fa-list-ol"></i> Numeração Automática
+                </label>
+                <label class="mode-option" id="bothModeOption">
+                    <input type="radio" id="bothMode" name="operationMode" value="both">
+                    <i class="fas fa-layer-group"></i> Ambos
+                </label>
+            </div>
+            
+            <div class="form-group" id="fileSection">
+                <label>Selecione seu arquivo Excel:</label>
+                <div class="file-container">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="fileInput" accept=".xlsx, .xls">
+                        <div class="file-input-button">
+                            <i class="fas fa-cloud-upload-alt"></i> Escolher Arquivo
+                        </div>
+                    </div>
+                    <div class="file-info">
+                        Linhas carregadas
+                        <span id="rowCount">0</span>
+                    </div>
+                </div>
+                <div id="fileName" class="file-name">Nenhum arquivo selecionado</div>
+                
+                <div class="header-toggle" id="headerToggle" style="display: none;">
+                    <input type="checkbox" id="hasHeader" checked>
+                    <label for="hasHeader">Meu arquivo possui cabeçalho na primeira linha</label>
+                </div>
+            </div>
+            
+            <div class="btn-group" id="fileActionButtons" style="display: none;">
+                <button id="viewRawTableBtn">
+                    <i class="fas fa-table"></i> Visualizar Planilha
+                </button>
+            </div>
+            
+            <!-- Modo: Divisão de Colunas -->
+            <div class="mode-section active" id="divisionSection">
+                <div class="form-group">
+                    <label>Método de Divisão:</label>
+                    <div class="radio-group">
+                        <label class="radio-option" id="columnsOption">
+                            <input type="radio" id="splitByColumns" name="splitMethod" value="columns" checked>
+                            <i class="fas fa-columns"></i> Dividir por Colunas
+                        </label>
+                        <label class="radio-option" id="rowsOption">
+                            <input type="radio" id="splitByRows" name="splitMethod" value="rows">
+                            <i class="fas fa-grip-lines"></i> Linhas por Coluna
+                        </label>
+                        <label class="radio-option restricted" id="manualOption">
+                            <input type="radio" id="splitManual" name="splitMethod" value="manual">
+                            <i class="fas fa-sliders-h"></i> Distribuição Manual
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="columnsInput">
+                    <label for="numColumns">Número de Colunas Desejado:</label>
+                    <input type="number" id="numColumns" min="1" value="4">
+                </div>
+                
+                <div class="form-group" id="rowsInput" style="display: none;">
+                    <label for="rowsPerColumn">Linhas por Coluna:</label>
+                    <input type="number" id="rowsPerColumn" min="1" value="10">
+                </div>
+                
+                <div class="form-group" id="manualInput" style="display: none;">
+                    <label for="manualDistribution">Distribuição Manual (separada por vírgulas):</label>
+                    <input type="text" id="manualDistribution" placeholder="Ex: 200,200,100">
+                    <div style="font-size: 0.85rem; color: #6c7a89; margin-top: 5px;">
+                        Exemplo: Para 500 linhas, digite "200,200,100" para 3 colunas
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modo: Numeração Automática -->
+            <div class="mode-section" id="numberingSection">
+                <div class="auto-number-section">
+                    <h3><i class="fas fa-hashtag"></i> Configuração de Numeração</h3>
+                    <div class="header-toggle" id="autoNumberToggle">
+                        <input type="checkbox" id="autoNumberEnabled" checked>
+                        <label for="autoNumberEnabled">Ativar numeração automática</label>
+                    </div>
+                    <div id="autoNumberConfig" style="margin-top: 15px;">
+                        <div class="compact-grid">
+                            <div class="compact-group">
+                                <label for="numberCount">Quantidade de Números</label>
+                                <input type="number" id="numberCount" min="1" value="100">
+                            </div>
+                            
+                            <div class="compact-group">
+                                <label for="startNumber">Número Inicial</label>
+                                <input type="number" id="startNumber" min="1" value="1">
+                            </div>
+                            
+                            <div class="compact-group">
+                                <label for="stepNumber">Passo</label>
+                                <input type="number" id="stepNumber" min="1" value="1">
+                            </div>
+                            
+                            <div class="compact-group">
+                                <label for="numberDigits">Dígitos (opcional)</label>
+                                <input type="number" id="numberDigits" min="1" placeholder="Ex: 6">
+                            </div>
+                            
+                            <div class="compact-group">
+                                <label for="numberPrefix">Prefixo</label>
+                                <input type="text" id="numberPrefix" placeholder="Ex: REF-">
+                            </div>
+                            
+                            <div class="compact-group">
+                                <label for="numberSuffix">Sufixo</label>
+                                <input type="text" id="numberSuffix" placeholder="Ex: -2024">
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 0.85rem; color: #6c7a89; margin-top: 10px;">
+                            <i class="fas fa-info-circle"></i> O campo "Dígitos" preenche com zeros à esquerda
+                        </div>
+                        
+                        <!-- Adicionar Colunas Especiais: QR Code e Código de Barras -->
+                        <div class="add-columns-container">
+                            <div class="add-column">
+                                <h4><i class="fas fa-barcode"></i> Código de Barras</h4>
+                                <div class="header-toggle">
+                                    <input type="checkbox" id="addBarcode">
+                                    <label for="addBarcode">Adicionar coluna de código de barras</label>
+                                </div>
+                                <div style="font-size: 0.85rem; color: #6c7a89; margin-top: 8px;">
+                                    Formato: "(valor)"
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <label>Fonte do código:</label>
+                                    <select class="column-select" id="barcodeSource">
+                                        <option value="auto">Numeração Automática</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="add-column">
+                                <h4><i class="fas fa-qrcode"></i> QR Code</h4>
+                                <div class="header-toggle">
+                                    <input type="checkbox" id="addQrcode">
+                                    <label for="addQrcode">Adicionar coluna de QR Code</label>
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <label>Fonte do QR Code:</label>
+                                    <select class="column-select" id="qrcodeSource">
+                                        <option value="auto">Numeração Automática</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="numberingColumnsInput">
+                    <label for="numberingNumColumns">Número de Colunas Desejado:</label>
+                    <input type="number" id="numberingNumColumns" min="1" value="4">
+                </div>
+            </div>
+            
+            <!-- Modo: Ambos -->
+            <div class="mode-section" id="bothSection">
+                <div class="form-group">
+                    <label>Método de Divisão:</label>
+                    <div class="radio-group">
+                        <label class="radio-option" id="bothColumnsOption">
+                            <input type="radio" id="bothSplitByColumns" name="bothSplitMethod" value="columns" checked>
+                            <i class="fas fa-columns"></i> Dividir por Colunas
+                        </label>
+                        <label class="radio-option" id="bothRowsOption">
+                            <input type="radio" id="bothSplitByRows" name="bothSplitMethod" value="rows">
+                            <i class="fas fa-grip-lines"></i> Linhas por Coluna
+                        </label>
+                        <label class="radio-option restricted" id="bothManualOption">
+                            <input type="radio" id="bothSplitManual" name="bothSplitMethod" value="manual">
+                            <i class="fas fa-sliders-h"></i> Distribuição Manual
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="bothColumnsInput">
+                    <label for="bothNumColumns">Número de Colunas Desejado:</label>
+                    <input type="number" id="bothNumColumns" min="1" value="4">
+                </div>
+                
+                <div class="form-group" id="bothRowsInput" style="display: none;">
+                    <label for="bothRowsPerColumn">Linhas por Coluna:</label>
+                    <input type="number" id="bothRowsPerColumn" min="1" value="10">
+                </div>
+                
+                <div class="form-group" id="bothManualInput" style="display: none;">
+                    <label for="bothManualDistribution">Distribuição Manual (separada por vírgulas):</label>
+                    <input type="text" id="bothManualDistribution" placeholder="Ex: 200,200,100">
+                    <div style="font-size: 0.85rem; color: #6c7a89; margin-top: 5px;">
+                        Exemplo: Para 500 linhas, digite "200,200,100" para 3 colunas
+                    </div>
+                </div>
+                
+                <div class="auto-number-section">
+                    <h3><i class="fas fa-hashtag"></i> Configuração de Numeração</h3>
+                    <div class="header-toggle" id="bothAutoNumberToggle">
+                        <input type="checkbox" id="bothAutoNumberEnabled" checked>
+                        <label for="bothAutoNumberEnabled">Ativar numeração automática</label>
+                    </div>
+                    <div id="bothAutoNumberConfig" style="margin-top: 15px;">
+                        <div class="compact-grid">
+                            <div class="compact-group">
+                                <label for="bothNumberCount">Quantidade de Números</label>
+                                <input type="number" id="bothNumberCount" min="1" value="100">
+                            </div>
+                            
+                            <div class="compact-group">
+                                <label for="bothStartNumber">Número Inicial</label>
+                                <input type="number" id="bothStartNumber" min="1" value="1">
+                            </div>
+                            
+                            <div class="compact-group">
+                                <label for="bothStepNumber">Passo</label>
+                                <input type="number" id="bothStepNumber" min="1" value="1">
+                            </div>
+                            
+                            <div class="compact-group">
+                                <label for="bothNumberDigits">Dígitos (opcional)</label>
+                                <input type="number" id="bothNumberDigits" min="1" placeholder="Ex: 6">
+                            </div>
+                            
+                            <div class="compact-group">
+                                <label for="bothNumberPrefix">Prefixo</label>
+                                <input type="text" id="bothNumberPrefix" placeholder="Ex: REF-">
+                            </div>
+                            
+                            <div class="compact-group">
+                                <label for="bothNumberSuffix">Sufixo</label>
+                                <input type="text" id="bothNumberSuffix" placeholder="Ex: -2024">
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 0.85rem; color: #6c7a89; margin-top: 10px;">
+                            <i class="fas fa-info-circle"></i> O campo "Dígitos" preenche com zeros à esquerda
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="additionalColumnsSection">
+                    <label>Adicionar Colunas Especiais:</label>
+                    <div class="add-columns-container">
+                        <div class="add-column">
+                            <h4><i class="fas fa-barcode"></i> Código de Barras</h4>
+                            <div class="header-toggle">
+                                <input type="checkbox" id="bothAddBarcode">
+                                <label for="bothAddBarcode">Adicionar coluna de código de barras</label>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #6c7a89; margin-top: 8px;">
+                                Formato: "(valor)"
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <label>Fonte do código:</label>
+                                <select class="column-select" id="bothBarcodeSource">
+                                    <option value="auto">Numeração Automática</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="add-column">
+                            <h4><i class="fas fa-qrcode"></i> QR Code</h4>
+                            <div class="header-toggle">
+                                <input type="checkbox" id="bothAddQrcode">
+                                <label for="bothAddQrcode">Adicionar coluna de QR Code</label>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <label>Fonte do QR Code:</label>
+                                <select class="column-select" id="bothQrcodeSource">
+                                    <option value="auto">Numeração Automática</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button id="processBtn">
+                    <i class="fas fa-cogs"></i> Processar
+                </button>
+                <button id="viewTableBtn">
+                    <i class="fas fa-table"></i> Visualizar Tabela
+                </button>
+                <button id="resetBtn">
+                    <i class="fas fa-trash-alt"></i> Limpar Processo
+                </button>
+                <button id="signupBtn">
+                    <i class="fas fa-user-plus"></i> Cadastrar
+                </button>
+            </div>
+        </div>
+        
+        <div class="card result-container" id="resultContainer">
+            <h2 class="card-title"><i class="fas fa-chart-bar"></i> Resultado da Divisão</h2>
+            
+            <div class="result-info">
+                <div class="info-box">
+                    <h3>Total de Linhas</h3>
+                    <p id="totalRows">0</p>
+                </div>
+                <div class="info-box">
+                    <h3>Colunas Geradas</h3>
+                    <p id="totalCols">0</p>
+                </div>
+                <div class="info-box">
+                    <h3>Distribuição</h3>
+                    <p id="distribution" style="font-size: 1.2rem;">0</p>
+                </div>
+            </div>
+            
+            <div id="numberRanges" style="margin-top: 15px; display: none;">
+                <h3 style="color: #2c3e50; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-list-ol"></i> Intervalos de Numeração
+                </h3>
+                <div id="rangeDetails" class="auto-number-options"></div>
+            </div>
+            
+            <p style="margin-top: 10px; color: #5d9cec; font-weight: 500; text-align: center;">
+                <i class="fas fa-info-circle"></i> Clique em "Visualizar Tabela" para ver os dados divididos
+            </p>
+        </div>
+        
+        <div class="history-panel" id="historyPanel">
+            <h3><i class="fas fa-history"></i> Últimas Operações</h3>
+            <div class="history-list" id="historyList">
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Como usar este sistema:</h3>
+            <ul>
+                <li>Selecione um modo de operação: Divisão de Colunas, Numeração Automática ou Ambos</li>
+                <li>Carregue um arquivo Excel ou gere números automaticamente</li>
+                <li>Configure as opções específicas para cada modo</li>
+                <li>Clique em "Processar" para gerar o resultado</li>
+                <li>Exporte para diferentes formatos para uso no InDesign/CorelDraw</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>Sistema desenvolvido para manipulação avançada de planilhas | Funcional em todos os navegadores modernos</p>
+        </div>
+    </div>
+    
+    <!-- Modal para visualização de tabela -->
+    <div class="modal" id="tableModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-table"></i> Visualização da Tabela</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-container">
+                    <table>
+                        <thead id="tableHeader"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" id="exportExcelModal">
+                    <i class="fas fa-file-excel"></i> Exportar para Excel
+                </button>
+                <button class="modal-btn" id="exportTxtModal">
+                    <i class="fas fa-file-alt"></i> Exportar para TXT (PC)
+                </button>
+                <button class="modal-btn" id="exportTxtMacModal">
+                    <i class="fas fa-file-alt"></i> Exportar para TXT (Mac)
+                </button>
+                <button class="modal-btn" id="closeModalBtn">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de cadastro -->
+    <div class="signup-modal" id="signupModal">
+        <div class="signup-content">
+            <div class="signup-header">
+                <h2><i class="fas fa-user-plus"></i> Criar Nova Conta</h2>
+                <p>Preencha os dados abaixo para se cadastrar</p>
+            </div>
+            <div class="signup-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="signupName">Nome Completo</label>
+                        <input type="text" id="signupName" placeholder="Seu nome completo">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupUsername">Nome de Usuário</label>
+                        <input type="text" id="signupUsername" placeholder="Nome de usuário">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupCompany">Empresa</label>
+                        <input type="text" id="signupCompany" placeholder="Nome da empresa">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPhone">Telefone</label>
+                        <input type="text" id="signupPhone" placeholder="(00) 00000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupCountry">País</label>
+                        <select id="signupCountry">
+                            <option value="">Selecione seu país</option>
+                            <option value="Brasil">Brasil</option>
+                            <option value="Portugal">Portugal</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="signupEmail">E-mail</label>
+                        <input type="email" id="signupEmail" placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Senha</label>
+                        <input type="password" id="signupPassword" placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirmar Senha</label>
+                        <input type="password" id="confirmPassword" placeholder="Digite novamente">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Plano:</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="signupPlan" value="free" checked>
+                                <i class="fas fa-user"></i> Gratuito (10 operações/mês)
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="signupPlan" value="basic">
+                                <i class="fas fa-star"></i> Básico (100 operações/mês)
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="signupPlan" value="premium">
+                                <i class="fas fa-crown"></i> Premium (Ilimitado)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="signup-footer">
+                <button id="cancelSignup">Cancelar</button>
+                <button id="confirmSignup">Criar Conta</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de login -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-content">
+            <div class="login-header">
+                <h2><i class="fas fa-sign-in-alt"></i> Login</h2>
+                <p>Digite suas credenciais para acessar</p>
+            </div>
+            <div class="login-body">
+                <div class="form-group">
+                    <label for="loginEmail">E-mail</label>
+                    <input type="email" id="loginEmail" placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Senha</label>
+                    <input type="password" id="loginPassword" placeholder="Sua senha">
+                </div>
+                <div class="form-group" style="text-align: center; margin-top: 20px;">
+                    <a href="#" style="color: #3498db; text-decoration: none;">Esqueceu sua senha?</a>
+                </div>
+            </div>
+            <div class="login-footer">
+                <button id="cancelLogin">Cancelar</button>
+                <button id="confirmLogin">Entrar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de pagamento -->
+    <div class="payment-modal" id="paymentModal">
+        <div class="payment-content">
+            <div class="payment-header">
+                <h2><i class="fas fa-credit-card"></i> Atualizar Plano</h2>
+                <p>Selecione seu plano e informe os dados de pagamento</p>
+            </div>
+            <div class="payment-body">
+                <div class="form-group">
+                    <label>Selecione o plano:</label>
+                    <div class="plan-option" onclick="selectPaymentPlan('basic')">
+                        <h3><i class="fas fa-star"></i> Plano Básico</h3>
+                        <p>R$ 29,90/mês - 100 operações mensais</p>
+                        <p>Recursos avançados de divisão</p>
+                    </div>
+                    <div class="plan-option" onclick="selectPaymentPlan('premium')">
+                        <h3><i class="fas fa-crown"></i> Plano Premium</h3>
+                        <p>R$ 59,90/mês - Operações ilimitadas</p>
+                        <p>Todos os recursos, suporte prioritário</p>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardNumber">Número do Cartão</label>
+                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000">
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cardExpiry">Validade (MM/AA)</label>
+                        <input type="text" id="cardExpiry" placeholder="MM/AA">
+                    </div>
+                    <div class="form-group">
+                        <label for="cardCVC">CVC</label>
+                        <input type="text" id="cardCVC" placeholder="000" maxlength="3">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button class="test-data-btn" id="fillTestData">
+                        <i class="fas fa-vial"></i> Preencher dados de teste
+                    </button>
+                </div>
+            </div>
+            <div class="payment-footer">
+                <button id="cancelPayment">Cancelar</button>
+                <button id="confirmPayment">Confirmar Pagamento</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de confirmação de arquivo -->
+    <div class="file-confirm-modal" id="fileConfirmModal">
+        <div class="file-confirm-content">
+            <div class="file-confirm-icon">
+                <i class="fas fa-file-excel"></i>
+            </div>
+            <h2>Arquivo Carregado com Sucesso!</h2>
+            <div class="file-confirm-name" id="confirmFileName"></div>
+            <p>O arquivo foi carregado e está pronto para processamento.</p>
+            
+            <div class="file-confirm-buttons">
+                <button class="file-confirm-btn" id="confirmFileCancel">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="file-confirm-btn" id="confirmFilePreview">
+                    <i class="fas fa-eye"></i> Visualizar Arquivo
+                </button>
+                <button class="file-confirm-btn" id="confirmFileOk">
+                    <i class="fas fa-check"></i> Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Minha Conta -->
+    <div class="account-modal" id="accountModal">
+        <div class="account-content">
+            <div class="account-header">
+                <h2><i class="fas fa-user-circle"></i> Minha Conta</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="account-body">
+                <div class="account-section">
+                    <h3><i class="fas fa-user"></i> Informações Pessoais</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Nome</strong>
+                            <span id="accountName">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Usuário</strong>
+                            <span id="accountUsername">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>E-mail</strong>
+                            <span id="accountEmail">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Empresa</strong>
+                            <span id="accountCompany">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Telefone</strong>
+                            <span id="accountPhone">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>País</strong>
+                            <span id="accountCountry">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="account-section">
+                    <h3><i class="fas fa-chart-line"></i> Informações da Conta</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Plano Atual</strong>
+                            <span id="accountPlan">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Status</strong>
+                            <span id="accountStatus">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Data de Início</strong>
+                            <span id="accountStartDate">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Próximo Pagamento</strong>
+                            <span id="accountNextPayment">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Operações Usadas</strong>
+                            <span id="accountOperations">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Limite de Operações</strong>
+                            <span id="accountOperationsLimit">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Total de Operações</strong>
+                            <span id="accountTotalOperations">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Último Acesso</strong>
+                            <span id="accountLastAccess">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="account-actions">
+                    <button class="account-btn" id="upgradeAccountBtn">
+                        <i class="fas fa-arrow-up"></i> Atualizar Plano
+                    </button>
+                    <button class="account-btn" id="downgradeAccountBtn">
+                        <i class="fas fa-arrow-down"></i> Downgrade para Gratuito
+                    </button>
+                    <button class="account-btn" id="cancelAccountBtn">
+                        <i class="fas fa-ban"></i> Cancelar Assinatura
+                    </button>
+                    <button class="account-btn" id="closeAccountModal">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Limites por plano
+        const PLAN_LIMITS = {
+            guest: { operations: 3, rows: 500, features: ['columns', 'rows'] },
+            free: { operations: 10, rows: 1000, features: ['columns', 'rows', 'header'] },
+            basic: { operations: 100, rows: 10000, features: ['columns', 'rows', 'manual', 'header'] },
+            premium: { operations: Infinity, rows: Infinity, features: ['all'] }
+        };
+        
+        // Estado do usuário
+        let userState = {
+            role: 'guest',
+            email: null,
+            name: null,
+            username: null,
+            company: null,
+            phone: null,
+            country: null,
+            operationsUsed: 0,
+            totalOperations: 0,
+            lastOperationMonth: null,
+            sessionTimer: null,
+            timerInterval: null,
+            history: [],
+            startDate: null,
+            lastLogin: null
+        };
+        
+        // Elementos de UI
+        const operationCounter = document.getElementById('operationCounter');
+        const accessMessage = document.getElementById('accessMessage');
+        const sessionTimerEl = document.getElementById('sessionTimer');
+        const timerElement = document.getElementById('timer');
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
+        const userBadgeElement = document.getElementById('userBadge');
+        const upgradeBanner = document.getElementById('upgradeBanner');
+        const signupBtn = document.getElementById('signupBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const accountBtn = document.getElementById('accountBtn');
+        const processBtn = document.getElementById('processBtn');
+        const signupModal = document.getElementById('signupModal');
+        const loginModal = document.getElementById('loginModal');
+        const cancelSignup = document.getElementById('cancelSignup');
+        const confirmSignup = document.getElementById('confirmSignup');
+        const cancelLogin = document.getElementById('cancelLogin');
+        const confirmLogin = document.getElementById('confirmLogin');
+        const paymentModal = document.getElementById('paymentModal');
+        const cancelPayment = document.getElementById('cancelPayment');
+        const confirmPayment = document.getElementById('confirmPayment');
+        const upgradeBtn = document.getElementById('upgradeBtn');
+        const fillTestData = document.getElementById('fillTestData');
+        const cancelSubscriptionModal = document.getElementById('cancelSubscriptionModal');
+        const cancelSubscriptionCancel = document.getElementById('cancelSubscriptionCancel');
+        const cancelSubscriptionConfirm = document.getElementById('cancelSubscriptionConfirm');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const viewRawTableBtn = document.getElementById('viewRawTableBtn');
+        const fileActionButtons = document.getElementById('fileActionButtons');
+        const accountModal = document.getElementById('accountModal');
+        const accountName = document.getElementById('accountName');
+        const accountUsername = document.getElementById('accountUsername');
+        const accountEmail = document.getElementById('accountEmail');
+        const accountCompany = document.getElementById('accountCompany');
+        const accountPhone = document.getElementById('accountPhone');
+        const accountCountry = document.getElementById('accountCountry');
+        const accountPlan = document.getElementById('accountPlan');
+        const accountStatus = document.getElementById('accountStatus');
+        const accountStartDate = document.getElementById('accountStartDate');
+        const accountNextPayment = document.getElementById('accountNextPayment');
+        const accountOperations = document.getElementById('accountOperations');
+        const accountOperationsLimit = document.getElementById('accountOperationsLimit');
+        const accountLastAccess = document.getElementById('accountLastAccess');
+        const accountTotalOperations = document.getElementById('accountTotalOperations');
+        const upgradeAccountBtn = document.getElementById('upgradeAccountBtn');
+        const downgradeAccountBtn = document.getElementById('downgradeAccountBtn');
+        const cancelAccountBtn = document.getElementById('cancelAccountBtn');
+        const closeAccountModal = document.getElementById('closeAccountModal');
+        const fileInput = document.getElementById('fileInput');
+        const fileNameElement = document.getElementById('fileName');
+        const rowCountElement = document.getElementById('rowCount');
+        const columnsOption = document.getElementById('columnsOption');
+        const rowsOption = document.getElementById('rowsOption');
+        const manualOption = document.getElementById('manualOption');
+        const columnsInput = document.getElementById('columnsInput');
+        const rowsInput = document.getElementById('rowsInput');
+        const manualInput = document.getElementById('manualInput');
+        const numColumns = document.getElementById('numColumns');
+        const rowsPerColumn = document.getElementById('rowsPerColumn');
+        const manualDistribution = document.getElementById('manualDistribution');
+        const hasHeaderCheckbox = document.getElementById('hasHeader');
+        const headerToggle = document.getElementById('headerToggle');
+        const viewTableBtn = document.getElementById('viewTableBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const totalRowsElement = document.getElementById('totalRows');
+        const totalColsElement = document.getElementById('totalCols');
+        const distributionElement = document.getElementById('distribution');
+        const tableHeader = document.getElementById('tableHeader');
+        const tableBody = document.getElementById('tableBody');
+        const tableModal = document.getElementById('tableModal');
+        const closeModal = document.querySelector('.close-modal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const exportExcelModal = document.getElementById('exportExcelModal');
+        const exportTxtModal = document.getElementById('exportTxtModal');
+        const exportTxtMacModal = document.getElementById('exportTxtMacModal');
+        const resetBtn = document.getElementById('resetBtn');
+        const autoNumberEnabled = document.getElementById('autoNumberEnabled');
+        const autoNumberConfig = document.getElementById('autoNumberConfig');
+        const autoNumberToggle = document.getElementById('autoNumberToggle');
+        const numberPrefix = document.getElementById('numberPrefix');
+        const numberSuffix = document.getElementById('numberSuffix');
+        const startNumber = document.getElementById('startNumber');
+        const stepNumber = document.getElementById('stepNumber');
+        const numberDigits = document.getElementById('numberDigits');
+        const numberRanges = document.getElementById('numberRanges');
+        const rangeDetails = document.getElementById('rangeDetails');
+        const numberCount = document.getElementById('numberCount');
+        const fileConfirmModal = document.getElementById('fileConfirmModal');
+        const confirmFileCancel = document.getElementById('confirmFileCancel');
+        const confirmFilePreview = document.getElementById('confirmFilePreview');
+        const confirmFileOk = document.getElementById('confirmFileOk');
+        const confirmFileName = document.getElementById('confirmFileName');
+        const historyPanel = document.getElementById('historyPanel');
+        const historyList = document.getElementById('historyList');
+        const fileInputButton = document.querySelector('.file-input-button');
+        const alertModal = document.getElementById('alertModal');
+        const alertMessage = document.getElementById('alertMessage');
+        const alertConfirm = document.getElementById('alertConfirm');
+        const alertIcon = document.getElementById('alertIcon');
+        const signupName = document.getElementById('signupName');
+        const signupUsername = document.getElementById('signupUsername');
+        const signupCompany = document.getElementById('signupCompany');
+        const signupPhone = document.getElementById('signupPhone');
+        const signupCountry = document.getElementById('signupCountry');
+        const signupEmail = document.getElementById('signupEmail');
+        const signupPassword = document.getElementById('signupPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const fileSection = document.getElementById('fileSection');
+        
+        // Novos elementos para modos de operação
+        const divisionModeOption = document.getElementById('divisionModeOption');
+        const numberingModeOption = document.getElementById('numberingModeOption');
+        const bothModeOption = document.getElementById('bothModeOption');
+        const divisionSection = document.getElementById('divisionSection');
+        const numberingSection = document.getElementById('numberingSection');
+        const bothSection = document.getElementById('bothSection');
+        const bothAutoNumberEnabled = document.getElementById('bothAutoNumberEnabled');
+        const bothAutoNumberConfig = document.getElementById('bothAutoNumberConfig');
+        const bothAddBarcode = document.getElementById('bothAddBarcode');
+        const bothAddQrcode = document.getElementById('bothAddQrcode');
+        const bothBarcodeSource = document.getElementById('bothBarcodeSource');
+        const bothQrcodeSource = document.getElementById('bothQrcodeSource');
+        const bothNumColumns = document.getElementById('bothNumColumns');
+        const bothRowsPerColumn = document.getElementById('bothRowsPerColumn');
+        const bothManualDistribution = document.getElementById('bothManualDistribution');
+        const bothNumberCount = document.getElementById('bothNumberCount');
+        const bothNumberPrefix = document.getElementById('bothNumberPrefix');
+        const bothNumberSuffix = document.getElementById('bothNumberSuffix');
+        const bothStartNumber = document.getElementById('bothStartNumber');
+        const bothStepNumber = document.getElementById('bothStepNumber');
+        const bothNumberDigits = document.getElementById('bothNumberDigits');
+        const numberingNumColumns = document.getElementById('numberingNumColumns');
+        const numberingColumnsInput = document.getElementById('numberingColumnsInput');
+        const addBarcode = document.getElementById('addBarcode');
+        const addQrcode = document.getElementById('addQrcode');
+        const barcodeSource = document.getElementById('barcodeSource');
+        const qrcodeSource = document.getElementById('qrcodeSource');
+        
+        // Variáveis da aplicação
+        let rawData = [];
+        let fullData = [];
+        let dividedColumns = [];
+        let fileName = "";
+        let originalHeaders = [];
+        let originalColumns = 0;
+        let hasHeader = true;
+        let currentProcessedHeaders = [];
+        let numberingData = [];
+        let generatedData = [];
+        let processedData = [];
+        let processedHeaders = [];
+        let currentMode = 'division'; // Modo atual: division, numbering, both
+        
+        // Função para mostrar alertas personalizados
+        function showAlert(message, type = 'info') {
+            alertMessage.textContent = message;
+            
+            switch(type) {
+                case 'error':
+                    alertIcon.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#e74c3c"></i>';
+                    break;
+                case 'success':
+                    alertIcon.innerHTML = '<i class="fas fa-check-circle" style="color:#27ae60"></i>';
+                    break;
+                case 'warning':
+                    alertIcon.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#f39c12"></i>';
+                    break;
+                default:
+                    alertIcon.innerHTML = '<i class="fas fa-info-circle" style="color:#3498db"></i>';
+            }
+            
+            alertModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Fechar alerta
+        alertConfirm.addEventListener('click', function() {
+            alertModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Atualizar botão de arquivo
+        function updateFileButton() {
+            if (rawData.length > 0) {
+                fileInputButton.innerHTML = '<i class="fas fa-sync"></i> Carregar Novo Arquivo';
+                fileInputButton.parentElement.parentElement.classList.add('file-loaded');
+                fileActionButtons.style.display = 'flex';
+            } else {
+                fileInputButton.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Escolher Arquivo';
+                fileInputButton.parentElement.parentElement.classList.remove('file-loaded');
+                fileActionButtons.style.display = 'none';
+            }
+        }
+        
+        // Função para limpar todos os campos do formulário
+        function clearAllFields() {
+            // Limpar campos de numeração automática
+            document.getElementById('numberCount').value = '100';
+            document.getElementById('startNumber').value = '1';
+            document.getElementById('stepNumber').value = '1';
+            document.getElementById('numberDigits').value = '';
+            document.getElementById('numberPrefix').value = '';
+            document.getElementById('numberSuffix').value = '';
+            document.getElementById('autoNumberEnabled').checked = true;
+            document.getElementById('autoNumberConfig').style.display = 'block';
+            
+            // Limpar campos de divisão
+            document.getElementById('numColumns').value = '4';
+            document.getElementById('rowsPerColumn').value = '10';
+            document.getElementById('manualDistribution').value = '';
+            document.getElementById('splitByColumns').checked = true;
+            document.getElementById('columnsInput').style.display = 'block';
+            document.getElementById('rowsInput').style.display = 'none';
+            document.getElementById('manualInput').style.display = 'none';
+            
+            // Limpar campos do modo ambos
+            document.getElementById('bothNumberCount').value = '100';
+            document.getElementById('bothStartNumber').value = '1';
+            document.getElementById('bothStepNumber').value = '1';
+            document.getElementById('bothNumberDigits').value = '';
+            document.getElementById('bothNumberPrefix').value = '';
+            document.getElementById('bothNumberSuffix').value = '';
+            document.getElementById('bothAutoNumberEnabled').checked = true;
+            document.getElementById('bothNumColumns').value = '4';
+            document.getElementById('bothRowsPerColumn').value = '10';
+            document.getElementById('bothManualDistribution').value = '';
+            
+            // Limpar checkboxes de colunas especiais
+            document.getElementById('addBarcode').checked = false;
+            document.getElementById('addQrcode').checked = false;
+            document.getElementById('bothAddBarcode').checked = false;
+            document.getElementById('bothAddQrcode').checked = false;
+            
+            // Resetar selects para opção padrão
+            if (barcodeSource.options.length > 0) barcodeSource.selectedIndex = 0;
+            if (qrcodeSource.options.length > 0) qrcodeSource.selectedIndex = 0;
+            if (bothBarcodeSource.options.length > 0) bothBarcodeSource.selectedIndex = 0;
+            if (bothQrcodeSource.options.length > 0) bothQrcodeSource.selectedIndex = 0;
+            
+            updateRadioStyles();
+        }
+        
+        // Função para atualizar a interface conforme o plano
+        function updateUIForPlan() {
+            const plan = userState.role;
+            const limits = PLAN_LIMITS[plan];
+            
+            updateExportCounter();
+            
+            if (plan === 'guest' || plan === 'free') {
+                manualOption.classList.add('restricted');
+                document.getElementById('additionalColumnsSection').classList.add('restricted');
+                exportTxtMacModal.classList.add('restricted');
+                historyPanel.style.display = 'none';
+                
+                manualOption.querySelector('input').disabled = true;
+                document.getElementById('autoNumberEnabled').disabled = true;
+                
+                upgradeBanner.style.display = 'flex';
+            } 
+            else if (plan === 'basic') {
+                manualOption.classList.remove('restricted');
+                manualOption.querySelector('input').disabled = false;
+                
+                document.getElementById('additionalColumnsSection').classList.add('restricted');
+                exportTxtMacModal.classList.add('restricted');
+                historyPanel.style.display = 'block';
+                
+                document.getElementById('autoNumberEnabled').disabled = true;
+                
+                upgradeBanner.style.display = 'flex';
+            } 
+            else if (plan === 'premium') {
+                manualOption.classList.remove('restricted');
+                document.getElementById('additionalColumnsSection').classList.remove('restricted');
+                exportTxtMacModal.classList.remove('restricted');
+                historyPanel.style.display = 'block';
+                
+                manualOption.querySelector('input').disabled = false;
+                document.getElementById('autoNumberEnabled').disabled = false;
+                
+                upgradeBanner.style.display = 'none';
+            }
+            
+            if (plan === 'free') {
+                upgradeBanner.querySelector('h3').innerHTML = '<i class="fas fa-crown"></i> Atualize para Premium!';
+                upgradeBanner.querySelector('p').textContent = 'Obtenha todos os recursos avançados e limites ampliados';
+            }
+            
+            updateWelcomeMessage();
+        }
+        
+        // Atualizar mensagem de boas-vindas
+        function updateWelcomeMessage() {
+            welcomeMessage.style.display = 'block';
+            welcomeMessage.className = 'welcome-message';
+            
+            switch(userState.role) {
+                case 'guest':
+                    welcomeMessage.classList.add('free-welcome');
+                    welcomeMessage.innerHTML = `
+                        <h3><i class="fas fa-gift"></i> Bem-vindo ao PlanilhaPro!</h3>
+                        <p>Você tem direito a 3 operações gratuitas por mês antes de precisar se cadastrar</p>
+                    `;
+                    break;
+                case 'free':
+                    welcomeMessage.classList.add('free-welcome');
+                    welcomeMessage.innerHTML = `
+                        <h3><i class="fas fa-user"></i> Plano Gratuito</h3>
+                        <p>Você tem direito a 10 operações por mês. Atualize para mais recursos!</p>
+                    `;
+                    break;
+                case 'basic':
+                    welcomeMessage.classList.add('basic-welcome');
+                    welcomeMessage.innerHTML = `
+                        <h3><i class="fas fa-star"></i> Plano Básico</h3>
+                        <p>Bem-vindo ${userState.name || ''}! Você tem direito a 100 operações por mês.</p>
+                    `;
+                    break;
+                case 'premium':
+                    welcomeMessage.classList.add('premium-welcome');
+                    welcomeMessage.innerHTML = `
+                        <h3><i class="fas fa-crown"></i> Plano Premium</h3>
+                        <p>Bem-vindo ${userState.name || ''}! Você tem acesso ilimitado a todos os recursos.</p>
+                    `;
+                    break;
+            }
+        }
+        
+        // Atualizar contador de exportações
+        function updateExportCounter() {
+            const plan = userState.role;
+            const limit = PLAN_LIMITS[plan].operations;
+            
+            if (plan === 'premium') {
+                operationCounter.textContent = `Operações ilimitadas`;
+            } else {
+                operationCounter.textContent = `Operações: ${userState.operationsUsed}/${limit}`;
+            }
+        }
+        
+        // Verificar se uma operação é permitida
+        function checkOperation() {
+            const plan = userState.role;
+            const limit = PLAN_LIMITS[plan].operations;
+            const rowLimit = PLAN_LIMITS[plan].rows;
+            
+            if (rawData.length > rowLimit) {
+                showAlert(`Seu plano ${plan} suporta no máximo ${rowLimit} linhas. Atualize para continuar.`, 'error');
+                return false;
+            }
+            
+            if (plan === 'guest') {
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                
+                if (userState.lastOperationMonth !== currentMonth) {
+                    userState.operationsUsed = 0;
+                    userState.lastOperationMonth = currentMonth;
+                    updateExportCounter();
+                }
+            }
+            
+            if (plan !== 'premium' && userState.operationsUsed >= limit) {
+                accessMessage.innerHTML = 
+                    `<i class="fas fa-exclamation-triangle"></i> Você atingiu o limite de ${limit} operações do plano ${plan}.`;
+                accessMessage.style.display = 'block';
+                processBtn.disabled = true;
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Mostrar aplicação ao carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            userState.lastOperationMonth = now.getMonth();
+            
+            updateUIForPlan();
+            
+            const savedUser = JSON.parse(localStorage.getItem('planilhaProCurrentUser'));
+            if (savedUser) {
+                loginUser(savedUser);
+            }
+            
+            // Inicializar modo
+            updateModeDisplay();
+            clearAllFields();
+        });
+        
+        // Função para limpar todo o processo
+        function resetProcess() {
+            rawData = [];
+            fullData = [];
+            dividedColumns = [];
+            fileName = "";
+            originalHeaders = [];
+            numberingData = [];
+            currentProcessedHeaders = [];
+            generatedData = [];
+            processedData = [];
+            processedHeaders = [];
+            
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').textContent = 'Nenhum arquivo selecionado';
+            document.getElementById('rowCount').textContent = '0';
+            document.getElementById('viewTableBtn').style.display = 'none';
+            document.getElementById('viewRawTableBtn').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'none';
+            document.getElementById('numberRanges').style.display = 'none';
+            rangeDetails.innerHTML = '';
+            
+            clearAllFields();
+            
+            accessMessage.style.display = 'none';
+            trialMessage.style.display = 'none';
+            processBtn.disabled = false;
+            
+            headerToggle.style.display = 'none';
+            
+            updateFileButton();
+            
+            // Re-popular selects com cabeçalhos vazios
+            populateColumnSelects([]);
+        }
+        
+        // Encerrar sessão
+        logoutBtn.addEventListener('click', function() {
+            resetProcess();
+            
+            const now = new Date();
+            userState = {
+                role: 'guest',
+                email: null,
+                name: null,
+                username: null,
+                company: null,
+                phone: null,
+                country: null,
+                operationsUsed: 0,
+                totalOperations: 0,
+                lastOperationMonth: now.getMonth(),
+                sessionTimer: null,
+                timerInterval: null,
+                history: [],
+                startDate: null,
+                lastLogin: null
+            };
+            
+            clearInterval(userState.timerInterval);
+            sessionTimerEl.style.display = 'none';
+            
+            logoutBtn.style.display = 'none';
+            accountBtn.style.display = 'none';
+            loginBtn.style.display = 'flex';
+            userEmailDisplay.textContent = 'Usuário Visitante';
+            userBadgeElement.textContent = 'Gratuito';
+            userBadgeElement.className = 'user-badge free-badge';
+            updateUIForPlan();
+            signupBtn.style.display = 'flex';
+            
+            populateColumnSelects([]);
+        });
+        
+        // Timer de sessão
+        function startSessionTimer(minutes) {
+            sessionTimerEl.style.display = 'block';
+            let timeLeft = minutes * 60;
+            
+            userState.timerInterval = setInterval(() => {
+                timeLeft--;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(userState.timerInterval);
+                    sessionExpired();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            }, 1000);
+        }
+        
+        // Sessão expirada
+        function sessionExpired() {
+            accessMessage.textContent = 'Sua sessão expirou. Faça login novamente para continuar.';
+            accessMessage.style.display = 'block';
+            accessMessage.style.backgroundColor = '#f44336';
+            
+            document.getElementById('processBtn').disabled = true;
+            document.getElementById('viewTableBtn').disabled = true;
+            document.getElementById('viewRawTableBtn').disabled = true;
+        }
+        
+        // Mostrar modal de cadastro
+        signupBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            signupModal.style.display = 'flex';
+        });
+        
+        // Mostrar modal de login
+        loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            loginModal.style.display = 'flex';
+        });
+        
+        // Fechar modal de cadastro
+        cancelSignup.addEventListener('click', function() {
+            signupModal.style.display = 'none';
+        });
+        
+        // Fechar modal de login
+        cancelLogin.addEventListener('click', function() {
+            loginModal.style.display = 'none';
+        });
+        
+        // Validar cadastro
+        function validateSignup(name, username, email, password, confirmPassword) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!name) {
+                showAlert('Por favor, insira seu nome completo.', 'error');
+                return false;
+            }
+            
+            if (!username) {
+                showAlert('Por favor, insira um nome de usuário.', 'error');
+                return false;
+            }
+            
+            if (!emailRegex.test(email)) {
+                showAlert('Por favor, insira um e-mail válido.', 'error');
+                return false;
+            }
+            
+            if (password.length < 6) {
+                showAlert('A senha deve ter pelo menos 6 caracteres.', 'error');
+                return false;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert('As senhas não coincidem. Por favor, digite novamente.', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Salvar usuário no localStorage
+        function saveUser(name, username, company, phone, country, email, password, plan) {
+            const users = JSON.parse(localStorage.getItem('planilhaProUsers')) || [];
+            
+            if (users.some(user => user.email === email)) {
+                showAlert('Este e-mail já está cadastrado. Por favor, faça login.', 'error');
+                return false;
+            }
+            
+            if (users.some(user => user.username === username)) {
+                showAlert('Este nome de usuário já está em uso. Por favor, escolha outro.', 'error');
+                return false;
+            }
+            
+            users.push({
+                name: name,
+                username: username,
+                company: company,
+                phone: phone,
+                country: country,
+                email: email,
+                password: password,
+                plan: plan,
+                joined: new Date().toISOString(),
+                lastLogin: new Date().toISOString(),
+                totalOperations: 0,
+                operationsUsed: 0
+            });
+            
+            localStorage.setItem('planilhaProUsers', JSON.stringify(users));
+            localStorage.setItem('planilhaProCurrentUser', JSON.stringify({
+                name: name,
+                username: username,
+                company: company,
+                phone: phone,
+                country: country,
+                email: email,
+                plan: plan,
+                startDate: new Date().toISOString(),
+                lastLogin: new Date().toISOString(),
+                totalOperations: 0,
+                operationsUsed: 0
+            }));
+            return true;
+        }
+        
+        // Fazer login do usuário
+        function loginUser(userData) {
+            userState.role = userData.plan;
+            userState.email = userData.email;
+            userState.name = userData.name;
+            userState.username = userData.username;
+            userState.company = userData.company;
+            userState.phone = userData.phone;
+            userState.country = userData.country;
+            userState.lastLogin = new Date().toISOString();
+            userState.operationsUsed = userData.operationsUsed || 0;
+            userState.totalOperations = userData.totalOperations || 0;
+            userState.startDate = userData.startDate || new Date().toISOString();
+            
+            userEmailDisplay.textContent = userData.email;
+            userBadgeElement.textContent = 
+                userData.plan === 'free' ? 'Gratuito' : 
+                userData.plan === 'basic' ? 'Básico' : 'Premium';
+                
+            userBadgeElement.className = 'user-badge ' + 
+                (userData.plan === 'free' ? 'free-badge' : 
+                 userData.plan === 'basic' ? 'basic-badge' : 'premium-badge');
+            
+            updateUIForPlan();
+            logoutBtn.style.display = 'flex';
+            accountBtn.style.display = 'flex';
+            loginBtn.style.display = 'none';
+            signupBtn.style.display = 'none';
+            
+            accessMessage.style.display = 'none';
+            trialMessage.style.display = 'none';
+            
+            processBtn.disabled = false;
+            
+            showAlert(`Bem-vindo de volta ao PlanilhaPro ${userData.plan === 'free' ? 'Gratuito' : userData.plan}!`, 'success');
+        }
+        
+        // Confirmar cadastro
+        confirmSignup.addEventListener('click', function() {
+            const name = signupName.value;
+            const username = signupUsername.value;
+            const company = signupCompany.value;
+            const phone = signupPhone.value;
+            const country = signupCountry.value;
+            const email = signupEmail.value;
+            const password = signupPassword.value;
+            const confirmPass = confirmPassword.value;
+            const plan = document.querySelector('input[name="signupPlan"]:checked').value;
+            
+            if (!validateSignup(name, username, email, password, confirmPass)) return;
+            
+            if (!saveUser(name, username, company, phone, country, email, password, plan)) return;
+            
+            const savedUser = JSON.parse(localStorage.getItem('planilhaProCurrentUser'));
+            loginUser(savedUser);
+            
+            signupModal.style.display = 'none';
+        });
+        
+        // Confirmar login
+        confirmLogin.addEventListener('click', function() {
+            const email = loginEmail.value;
+            const password = loginPassword.value;
+            
+            if (!email || !password) {
+                showAlert('Por favor, preencha todos os campos.', 'error');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('planilhaProUsers')) || [];
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                loginUser(user);
+                loginModal.style.display = 'none'; // Fechar modal após login
+            } else {
+                showAlert('E-mail ou senha incorretos. Tente novamente.', 'error');
+            }
+        });
+        
+        // Mostrar modal de pagamento
+        upgradeBtn.addEventListener('click', function() {
+            paymentModal.style.display = 'flex';
+        });
+        
+        // Fechar modal de pagamento
+        cancelPayment.addEventListener('click', function() {
+            paymentModal.style.display = 'none';
+        });
+        
+        // Selecionar plano de pagamento
+        function selectPaymentPlan(plan) {
+            document.querySelectorAll('.plan-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            if (plan === 'basic') {
+                document.querySelector('.plan-option:nth-child(1)').classList.add('selected');
+            } else if (plan === 'premium') {
+                document.querySelector('.plan-option:nth-child(2)').classList.add('selected');
+            }
+            
+            document.getElementById('confirmPayment').dataset.plan = plan;
+        }
+        
+        // Preencher dados de teste para pagamento
+        fillTestData.addEventListener('click', function() {
+            document.getElementById('cardNumber').value = '4242 4242 4242 4242';
+            document.getElementById('cardExpiry').value = '12/28';
+            document.getElementById('cardCVC').value = '123';
+        });
+        
+        // Confirmar pagamento
+        confirmPayment.addEventListener('click', function() {
+            const plan = this.dataset.plan;
+            const cardNumber = document.getElementById('cardNumber').value;
+            const cardExpiry = document.getElementById('cardExpiry').value;
+            const cardCVC = document.getElementById('cardCVC').value;
+            
+            if (!cardNumber || cardNumber.replace(/\s/g, '').length !== 16) {
+                showAlert('Por favor, insira um número de cartão válido (16 dígitos).', 'error');
+                return;
+            }
+            
+            if (!cardExpiry || !cardExpiry.match(/^\d{2}\/\d{2}$/)) {
+                showAlert('Por favor, insira uma validade no formato MM/AA.', 'error');
+                return;
+            }
+            
+            if (!cardCVC || cardCVC.length !== 3) {
+                showAlert('Por favor, insira um CVC válido (3 dígitos).', 'error');
+                return;
+            }
+            
+            showAlert(`Pagamento processado com sucesso! Seu plano ${plan === 'basic' ? 'Básico' : 'Premium'} foi ativado.`, 'success');
+            
+            const users = JSON.parse(localStorage.getItem('planilhaProUsers')) || [];
+            const userIndex = users.findIndex(user => user.email === userState.email);
+            
+            if (userIndex !== -1) {
+                users[userIndex].plan = plan;
+                localStorage.setItem('planilhaProUsers', JSON.stringify(users));
+                
+                const currentUser = JSON.parse(localStorage.getItem('planilhaProCurrentUser'));
+                currentUser.plan = plan;
+                localStorage.setItem('planilhaProCurrentUser', JSON.stringify(currentUser));
+                
+                userState.role = plan;
+                
+                userBadgeElement.textContent = 
+                    plan === 'basic' ? 'Básico' : 'Premium';
+                    
+                userBadgeElement.className = 'user-badge ' + 
+                    (plan === 'basic' ? 'basic-badge' : 'premium-badge');
+                
+                updateUIForPlan();
+            }
+            
+            paymentModal.style.display = 'none';
+        });
+        
+        // Modal de confirmação de arquivo
+        confirmFileCancel.addEventListener('click', function() {
+            fileConfirmModal.style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            fileNameElement.textContent = 'Nenhum arquivo selecionado';
+            rowCountElement.textContent = '0';
+            headerToggle.style.display = 'none';
+            updateFileButton();
+        });
+        
+        // Visualizar arquivo no modal de confirmação
+        confirmFilePreview.addEventListener('click', function() {
+            fileConfirmModal.style.display = 'none';
+            openModal(true);
+        });
+        
+        confirmFileOk.addEventListener('click', function() {
+            fileConfirmModal.style.display = 'none';
+        });
+        
+        // Ativar/desativar configurações de numeração automática
+        autoNumberEnabled.addEventListener('change', function() {
+            if (this.checked) {
+                autoNumberConfig.style.display = 'block';
+                autoNumberToggle.classList.add('selected');
+            } else {
+                autoNumberConfig.style.display = 'none';
+                autoNumberToggle.classList.remove('selected');
+            }
+        });
+        
+        // Radio button styling
+        function updateRadioStyles() {
+            columnsOption.classList.toggle('selected', document.getElementById('splitByColumns').checked);
+            rowsOption.classList.toggle('selected', document.getElementById('splitByRows').checked);
+            manualOption.classList.toggle('selected', document.getElementById('splitManual').checked);
+        }
+        
+        // Toggle between split methods
+        columnsOption.addEventListener('click', function() {
+            document.getElementById('splitByColumns').checked = true;
+            columnsInput.style.display = 'block';
+            rowsInput.style.display = 'none';
+            manualInput.style.display = 'none';
+            updateRadioStyles();
+        });
+        
+        rowsOption.addEventListener('click', function() {
+            document.getElementById('splitByRows').checked = true;
+            columnsInput.style.display = 'none';
+            rowsInput.style.display = 'block';
+            manualInput.style.display = 'none';
+            updateRadioStyles();
+        });
+        
+        manualOption.addEventListener('click', function() {
+            document.getElementById('splitManual').checked = true;
+            columnsInput.style.display = 'none';
+            rowsInput.style.display = 'none';
+            manualInput.style.display = 'block';
+            updateRadioStyles();
+        });
+        
+        // Função para obter valor da fonte (numeração automática ou coluna específica)
+        function getSourceValue(row, sourceValue, mode) {
+            // Se for "auto" (numeração automática)
+            if (sourceValue === 'auto') {
+                // Se estiver no modo numeração ou ambos com numeração ativa, a primeira coluna é a numeração
+                if (mode === 'numbering' || (mode === 'both' && bothAutoNumberEnabled.checked)) {
+                    return row[0];
+                }
+                return '';
+            } else {
+                // Converter para número (índice da coluna)
+                const colIndex = parseInt(sourceValue);
+                
+                // Verificar se o índice é válido
+                if (!isNaN(colIndex)) {
+                    // No modo "both" com numeração ativa, as colunas da tabela original começam no índice 1
+                    if (mode === 'both' && bothAutoNumberEnabled.checked) {
+                        // Ajustar índice: +1 porque a primeira coluna é a numeração
+                        const adjustedIndex = colIndex + 1;
+                        if (adjustedIndex < row.length) {
+                            return row[adjustedIndex] || '';
+                        }
+                    } else {
+                        // Nos outros modos, usar o índice diretamente
+                        if (colIndex < row.length) {
+                            return row[colIndex] || '';
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+        
+        // Handle file selection
+        function loadFile(file) {
+            if (!file) return;
+            
+            if (rawData.length > 0) {
+                resetProcess();
+            }
+            
+            fileName = file.name;
+            fileNameElement.textContent = file.name;
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    
+                    // Usar raw: true para manter os valores originais
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: true});
+                    
+                    fullData = jsonData;
+                    
+                    hasHeader = hasHeaderCheckbox.checked;
+                    
+                    if (hasHeader && jsonData.length > 0) {
+                        originalHeaders = jsonData[0].map(h => h || `Coluna ${jsonData[0].indexOf(h) + 1}`);
+                        rawData = jsonData.slice(1);
+                    } else {
+                        originalHeaders = [];
+                        rawData = jsonData;
+                    }
+                    
+                    rawData = rawData.filter(row => row.length > 0 && row.some(cell => cell !== null && cell !== ''));
+                    
+                    rowCountElement.textContent = rawData.length;
+                    
+                    let maxCols = 0;
+                    for (let row of rawData) {
+                        if (row.length > maxCols) maxCols = row.length;
+                    }
+                    
+                    originalColumns = maxCols;
+                    
+                    if (originalHeaders.length === 0) {
+                        originalHeaders = Array.from({length: maxCols}, (_, i) => `Coluna ${i+1}`);
+                    }
+                    
+                    populateColumnSelects(originalHeaders);
+                    
+                    confirmFileName.textContent = fileName;
+                    fileConfirmModal.style.display = 'flex';
+                    
+                    headerToggle.style.display = 'flex';
+                    
+                    updateFileButton();
+                    
+                } catch (error) {
+                    console.error('Erro ao processar o arquivo:', error);
+                    showAlert('Erro ao processar o arquivo. Certifique-se de que é um arquivo Excel válido.', 'error');
+                    rowCountElement.textContent = '0';
+                    fileNameElement.textContent = 'Erro ao carregar arquivo';
+                    rawData = [];
+                    headerToggle.style.display = 'none';
+                    
+                    updateFileButton();
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // Atualizar contador de linhas quando o checkbox for alterado
+        hasHeaderCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                headerToggle.classList.add('selected');
+            } else {
+                headerToggle.classList.remove('selected');
+            }
+            
+            if (fullData.length > 0) {
+                hasHeader = this.checked;
+                if (hasHeader) {
+                    originalHeaders = fullData[0].map(h => h || `Coluna ${fullData[0].indexOf(h) + 1}`);
+                    rawData = fullData.slice(1);
+                } else {
+                    originalHeaders = [];
+                    rawData = fullData;
+                }
+                
+                rawData = rawData.filter(row => row.length > 0 && row.some(cell => cell !== null && cell !== ''));
+                
+                rowCountElement.textContent = rawData.length;
+                
+                if (originalHeaders.length === 0) {
+                    let maxCols = 0;
+                    for (let row of rawData) {
+                        if (row.length > maxCols) maxCols = row.length;
+                    }
+                    originalHeaders = Array.from({length: maxCols}, (_, i) => `Coluna ${i+1}`);
+                }
+                
+                populateColumnSelects(originalHeaders);
+            }
+            
+            if (resultContainer.style.display === 'block') {
+                resultContainer.style.display = 'none';
+                viewTableBtn.style.display = 'none';
+            }
+        });
+        
+        // Preencher selects de colunas
+        function populateColumnSelects(headers) {
+            // Limpar todos os selects
+            bothBarcodeSource.innerHTML = '';
+            bothQrcodeSource.innerHTML = '';
+            barcodeSource.innerHTML = '';
+            qrcodeSource.innerHTML = '';
+            
+            // Adicionar opção "Numeração Automática"
+            const autoOption = document.createElement('option');
+            autoOption.value = 'auto';
+            autoOption.textContent = 'Numeração Automática';
+            
+            bothBarcodeSource.appendChild(autoOption.cloneNode(true));
+            bothQrcodeSource.appendChild(autoOption.cloneNode(true));
+            barcodeSource.appendChild(autoOption.cloneNode(true));
+            qrcodeSource.appendChild(autoOption.cloneNode(true));
+            
+            // Adicionar opções para cada coluna da tabela
+            if (headers && headers.length > 0) {
+                headers.forEach((header, index) => {
+                    // Criar opção para Código de Barras
+                    const barcodeOption = document.createElement('option');
+                    barcodeOption.value = index.toString();
+                    barcodeOption.textContent = `Coluna ${index + 1}: ${header}`;
+                    barcodeSource.appendChild(barcodeOption.cloneNode(true));
+                    
+                    // Criar opção para QR Code
+                    const qrcodeOption = document.createElement('option');
+                    qrcodeOption.value = index.toString();
+                    qrcodeOption.textContent = `Coluna ${index + 1}: ${header}`;
+                    qrcodeSource.appendChild(qrcodeOption.cloneNode(true));
+                    
+                    // Criar opções para o modo "Ambos"
+                    bothBarcodeSource.appendChild(barcodeOption.cloneNode(true));
+                    bothQrcodeSource.appendChild(qrcodeOption.cloneNode(true));
+                });
+            }
+        }
+        
+        fileInput.addEventListener('change', function(e) {
+            if (!fileInput.files.length) return;
+            loadFile(fileInput.files[0]);
+        });
+        
+        // Modal functions
+        function openModal(isPreview) {
+            if (isPreview) {
+                document.querySelector('.modal-header h2').innerHTML = '<i class="fas fa-table"></i> Visualização do Arquivo Carregado';
+                document.getElementById('exportExcelModal').style.display = 'none';
+                document.getElementById('exportTxtModal').style.display = 'none';
+                document.getElementById('exportTxtMacModal').style.display = 'none';
+                
+                generateTablePreview();
+            } else {
+                document.querySelector('.modal-header h2').innerHTML = '<i class="fas fa-table"></i> Visualização da Tabela Dividida';
+                document.getElementById('exportExcelModal').style.display = 'flex';
+                document.getElementById('exportTxtModal').style.display = 'flex';
+                document.getElementById('exportTxtMacModal').style.display = 'flex';
+                
+                generateTable(dividedColumns.length, dividedColumns);
+            }
+            tableModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModalHandler() {
+            tableModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        closeModal.addEventListener('click', closeModalHandler);
+        closeModalBtn.addEventListener('click', closeModalHandler);
+        
+        // Gerar tabela de pré-visualização para arquivo carregado
+        function generateTablePreview() {
+            tableHeader.innerHTML = '';
+            
+            for (let j = 0; j < originalHeaders.length; j++) {
+                const th = document.createElement('th');
+                th.textContent = originalHeaders[j];
+                tableHeader.appendChild(th);
+            }
+            
+            tableBody.innerHTML = '';
+            for (let row = 0; row < Math.min(10, rawData.length); row++) {
+                const tr = document.createElement('tr');
+                
+                const rowData = rawData[row];
+                for (let cell = 0; cell < originalHeaders.length; cell++) {
+                    const td = document.createElement('td');
+                    if (cell < rowData.length) {
+                        td.textContent = rowData[cell];
+                    } else {
+                        td.innerHTML = '&nbsp;';
+                    }
+                    tr.appendChild(td);
+                }
+                
+                tableBody.appendChild(tr);
+            }
+        }
+        
+        // Botão para visualizar a planilha carregada
+        viewRawTableBtn.addEventListener('click', function() {
+            openModal(true);
+        });
+        
+        // Process data
+        processBtn.addEventListener('click', function() {
+            if (!checkOperation()) return;
+            
+            const hasFile = rawData.length > 0;
+            
+            if (currentMode === 'division' && !hasFile) {
+                showAlert('Para o modo Divisão de Colunas, você deve carregar um arquivo Excel.', 'error');
+                return;
+            }
+            
+            processedData = [...rawData];
+            processedHeaders = [...originalHeaders];
+            
+            generatedData = [];
+            currentProcessedHeaders = [];
+            
+            numberingData = [];
+            numberRanges.style.display = 'none';
+            
+            // Processamento específico por modo
+            if (currentMode === 'division') {
+                processDivisionMode();
+            } else if (currentMode === 'numbering') {
+                processNumberingMode();
+            } else if (currentMode === 'both') {
+                processBothMode();
+            }
+            
+            viewTableBtn.style.display = 'flex';
+            
+            userState.operationsUsed++;
+            userState.totalOperations++;
+            updateExportCounter();
+            
+            const operation = {
+                type: 'Processamento',
+                date: new Date().toLocaleString(),
+                rows: processedData.length,
+                columns: dividedColumns.length,
+                method: currentMode
+            };
+            
+            userState.history.unshift(operation);
+            updateHistory();
+        });
+        
+        function processDivisionMode() {
+            const splitMethod = document.querySelector('input[name="splitMethod"]:checked').value;
+            let numCols;
+            
+            if (splitMethod === 'columns') {
+                numCols = parseInt(numColumns.value) || 4;
+                if (numCols < 1) {
+                    showAlert('Número de colunas deve ser maior que zero.', 'error');
+                    return;
+                }
+                dividedColumns = splitByColumnCount(processedData, numCols);
+            } else if (splitMethod === 'rows') {
+                const rowsPerCol = parseInt(rowsPerColumn.value) || 10;
+                if (rowsPerCol < 1) {
+                    showAlert('Linhas por coluna deve ser maior que zero.', 'error');
+                    return;
+                }
+                numCols = Math.ceil(processedData.length / rowsPerCol);
+                dividedColumns = splitByRowCount(processedData, rowsPerCol);
+            } else if (splitMethod === 'manual') {
+                const manualInput = manualDistribution.value;
+                const parts = manualInput.split(',').map(Number).filter(n => !isNaN(n) && n > 0);
+                if (parts.length === 0) {
+                    showAlert("Por favor, insira números válidos separados por vírgulas.", 'error');
+                    return;
+                }
+                dividedColumns = splitManual(processedData, parts);
+                numCols = dividedColumns.length;
+            }
+            
+            currentProcessedHeaders = processedHeaders;
+            displayResults(processedData.length, numCols, dividedColumns, []);
+        }
+        
+        function processNumberingMode() {
+            const count = parseInt(numberCount.value) || 100;
+            const prefix = numberPrefix.value || '';
+            const suffix = numberSuffix.value || '';
+            let start = parseInt(startNumber.value) || 1;
+            const step = parseInt(stepNumber.value) || 1;
+            const digits = parseInt(numberDigits.value) || 0;
+            const numCols = parseInt(numberingNumColumns.value) || 4;
+            
+            const numbers = [];
+            for (let i = 0; i < count; i++) {
+                let num = start + i * step;
+                let numStr = num.toString();
+                if (digits > 0 && numStr.length < digits) {
+                    numStr = numStr.padStart(digits, '0');
+                }
+                numbers.push([prefix + numStr + suffix]);
+            }
+            
+            numberingData = numbers; // Armazenar os números gerados
+            
+            // Processar dados para adicionar colunas especiais
+            let processedData = [...numberingData];
+            let processedHeaders = ['Número'];
+
+            // Adicionar coluna de Código de Barras se selecionado
+            if (document.getElementById('addBarcode').checked) {
+                const source = document.getElementById('barcodeSource').value;
+
+                processedData = processedData.map(row => {
+                    const value = getSourceValue(row, source, 'numbering');
+                    return [...row, `(${value})`];
+                });
+                processedHeaders.push('Código de Barras');
+            }
+
+            // Adicionar coluna de QR Code se selecionado
+            if (document.getElementById('addQrcode').checked) {
+                const source = document.getElementById('qrcodeSource').value;
+
+                processedData = processedData.map(row => {
+                    const value = getSourceValue(row, source, 'numbering');
+                    return [...row, value];
+                });
+                processedHeaders.push('#QR Code');
+            }
+            
+            // Dividir em colunas
+            dividedColumns = splitByColumnCount(processedData, numCols);
+            currentProcessedHeaders = processedHeaders;
+
+            displayResults(processedData.length, numCols, dividedColumns, []);
+        }
+        
+        function processBothMode() {
+            const addNumbering = bothAutoNumberEnabled.checked;
+            const count = parseInt(bothNumberCount.value) || 100;
+            const prefix = bothNumberPrefix.value || '';
+            const suffix = bothNumberSuffix.value || '';
+            let start = parseInt(bothStartNumber.value) || 1;
+            const step = parseInt(bothStepNumber.value) || 1;
+            const digits = parseInt(bothNumberDigits.value) || 0;
+            
+            numberingData = [];
+            if (addNumbering) {
+                for (let i = 0; i < (rawData.length > 0 ? rawData.length : count); i++) {
+                    let num = start + i * step;
+                    let numStr = num.toString();
+                    if (digits > 0 && numStr.length < digits) {
+                        numStr = numStr.padStart(digits, '0');
+                    }
+                    numberingData.push([prefix + numStr + suffix]);
+                }
+                
+                if (rawData.length > 0) {
+                    processedData = rawData.map((row, index) => {
+                        return [numberingData[index][0], ...row];
+                    });
+                    processedHeaders = ['Número', ...originalHeaders];
+                } else {
+                    processedData = numberingData;
+                    processedHeaders = ['Número'];
+                }
+            } else {
+                processedData = [...rawData];
+                processedHeaders = [...originalHeaders];
+            }
+            
+            // Adicionar colunas especiais se necessário
+            if (bothAddBarcode.checked) {
+                const source = bothBarcodeSource.value;
+                
+                processedData = processedData.map(row => {
+                    const value = getSourceValue(row, source, 'both');
+                    return [...row, `(${value})`];
+                });
+                processedHeaders.push('Código de Barras');
+            }
+            
+            if (bothAddQrcode.checked) {
+                const source = bothQrcodeSource.value;
+                
+                processedData = processedData.map(row => {
+                    const value = getSourceValue(row, source, 'both');
+                    return [...row, value];
+                });
+                processedHeaders.push('#QR Code');
+            }
+            
+            // Processar divisão
+            const splitMethod = document.querySelector('input[name="bothSplitMethod"]:checked').value;
+            let numCols;
+            let ranges = [];
+            
+            if (splitMethod === 'columns') {
+                numCols = parseInt(bothNumColumns.value) || 4;
+                if (numCols < 1) {
+                    showAlert('Número de colunas deve ser maior que zero.', 'error');
+                    return;
+                }
+                dividedColumns = splitByColumnCount(processedData, numCols);
+            } else if (splitMethod === 'rows') {
+                const rowsPerCol = parseInt(bothRowsPerColumn.value) || 10;
+                if (rowsPerCol < 1) {
+                    showAlert('Linhas por coluna deve ser maior que zero.', 'error');
+                    return;
+                }
+                numCols = Math.ceil(processedData.length / rowsPerCol);
+                dividedColumns = splitByRowCount(processedData, rowsPerCol);
+            } else if (splitMethod === 'manual') {
+                const manualInput = bothManualDistribution.value;
+                const parts = manualInput.split(',').map(Number).filter(n => !isNaN(n) && n > 0);
+                if (parts.length === 0) {
+                    showAlert("Por favor, insira números válidos separados por vírgulas.", 'error');
+                    return;
+                }
+                dividedColumns = splitManual(processedData, parts);
+                numCols = dividedColumns.length;
+            }
+            
+            if (numberingData.length > 0) {
+                let currentIndex = 0;
+                ranges = [];
+                
+                for (let i = 0; i < dividedColumns.length; i++) {
+                    const colData = dividedColumns[i];
+                    const startNum = numberingData[currentIndex][0];
+                    const endNum = numberingData[currentIndex + colData.length - 1][0];
+                    ranges.push({
+                        start: startNum,
+                        end: endNum
+                    });
+                    currentIndex += colData.length;
+                }
+            }
+            
+            currentProcessedHeaders = processedHeaders;
+            displayResults(processedData.length, numCols, dividedColumns, ranges);
+        }
+        
+        // View table button
+        viewTableBtn.addEventListener('click', function() {
+            openModal(false);
+        });
+        
+        // Split by column count
+        function splitByColumnCount(data, columnCount) {
+            const totalRows = data.length;
+            const minRowsPerCol = Math.floor(totalRows / columnCount);
+            const remainder = totalRows % columnCount;
+            
+            const columns = [];
+            let start = 0;
+            
+            for (let i = 0; i < columnCount; i++) {
+                const extraRow = i < remainder ? 1 : 0;
+                const end = start + minRowsPerCol + extraRow;
+                
+                columns.push(data.slice(start, end));
+                start = end;
+            }
+            
+            return columns;
+        }
+        
+        // Split by row count
+        function splitByRowCount(data, rowsPerColumn) {
+            const columns = [];
+            let start = 0;
+            
+            while (start < data.length) {
+                const end = Math.min(start + rowsPerColumn, data.length);
+                columns.push(data.slice(start, end));
+                start = end;
+            }
+            
+            return columns;
+        }
+        
+        // Manual split
+        function splitManual(data, distribution) {
+            const columns = [];
+            let start = 0;
+            const total = data.length;
+            let distributionSum = distribution.reduce((a, b) => a + b, 0);
+            
+            if (distributionSum < total) {
+                distribution.push(total - distributionSum);
+            }
+            
+            for (let i = 0; i < distribution.length; i++) {
+                const size = distribution[i];
+                const end = Math.min(start + size, total);
+                
+                if (start >= total) break;
+                
+                columns.push(data.slice(start, end));
+                start = end;
+            }
+            
+            return columns;
+        }
+        
+        // Display results
+        function displayResults(totalRows, numCols, columns, ranges) {
+            totalRowsElement.textContent = totalRows;
+            totalColsElement.textContent = numCols;
+            
+            const distribution = columns.map(col => col.length).join(' - ');
+            distributionElement.textContent = distribution;
+            
+            resultContainer.style.display = 'block';
+            
+            if (ranges.length > 0) {
+                numberRanges.style.display = 'block';
+                rangeDetails.innerHTML = '';
+                
+                ranges.forEach((range, index) => {
+                    const rangeElement = document.createElement('div');
+                    rangeElement.className = 'number-range';
+                    rangeElement.style.display = 'block';
+                    rangeElement.innerHTML = `
+                        <strong>Coluna ${index + 1}:</strong> ${range.start} a ${range.end}
+                    `;
+                    rangeDetails.appendChild(rangeElement);
+                });
+            }
+            
+            generateTable(numCols, columns);
+        }
+        
+        // Generate table for divided data
+        function generateTable(numCols, columns) {
+            tableHeader.innerHTML = '';
+            
+            for (let i = 0; i < numCols; i++) {
+                for (let j = 0; j < currentProcessedHeaders.length; j++) {
+                    const th = document.createElement('th');
+                    th.textContent = `${currentProcessedHeaders[j]} (Col ${i+1})`;
+                    tableHeader.appendChild(th);
+                }
+            }
+            
+            const maxRows = Math.max(...columns.map(col => col.length));
+            
+            tableBody.innerHTML = '';
+            for (let row = 0; row < maxRows; row++) {
+                const tr = document.createElement('tr');
+                
+                for (let col = 0; col < numCols; col++) {
+                    if (row < columns[col].length) {
+                        const rowData = columns[col][row];
+                        
+                        for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
+                            const td = document.createElement('td');
+                            if (cell < rowData.length) {
+                                td.textContent = rowData[cell];
+                            } else {
+                                td.innerHTML = '&nbsp;';
+                            }
+                            tr.appendChild(td);
+                        }
+                    } else {
+                        for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
+                            const td = document.createElement('td');
+                            td.innerHTML = '&nbsp;';
+                            tr.appendChild(td);
+                        }
+                    }
+                }
+                
+                tableBody.appendChild(tr);
+            }
+        }
+        
+        // Export to Excel from modal
+        exportExcelModal.addEventListener('click', function() {
+            if (!dividedColumns.length) {
+                showAlert('Nenhum dado para exportar. Processe os dados primeiro.', 'error');
+                return;
+            }
+            
+            try {
+                const wb = XLSX.utils.book_new();
+                
+                const wsData = [];
+                
+                const headerRow = [];
+                for (let i = 0; i < dividedColumns.length; i++) {
+                    for (let j = 0; j < currentProcessedHeaders.length; j++) {
+                        headerRow.push(`${currentProcessedHeaders[j]} (Col ${i+1})`);
+                    }
+                }
+                wsData.push(headerRow);
+            
+                const maxRows = Math.max(...dividedColumns.map(col => col.length));
+                
+                for (let row = 0; row < maxRows; row++) {
+                    const rowData = [];
+                    
+                    for (let col = 0; col < dividedColumns.length; col++) {
+                        if (row < dividedColumns[col].length) {
+                            const rowCells = dividedColumns[col][row];
+                            for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
+                                if (cell < rowCells.length) {
+                                    rowData.push(rowCells[cell]);
+                                } else {
+                                    rowData.push("");
+                                }
+                            }
+                        } else {
+                            for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
+                                rowData.push("");
+                            }
+                        }
+                    }
+                    
+                    wsData.push(rowData);
+                }
+                
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                
+                XLSX.utils.book_append_sheet(wb, ws, "Dados Divididos");
+                
+                XLSX.writeFile(wb, `${fileName.replace(/\.[^/.]+$/, "")}_dividido.xlsx`);
+                
+                closeModalHandler();
+                
+                window.scrollTo(0, 0);
+                
+                if (confirm('Exportação concluída com sucesso! Deseja limpar os dados atuais?')) {
+                    resetProcess();
+                }
+                
+            } catch (error) {
+                console.error('Erro ao exportar para Excel:', error);
+                showAlert('Erro ao exportar para Excel. Tente novamente.', 'error');
+            }
+        });
+        
+        // Export to TXT from modal (UTF-8)
+        exportTxtModal.addEventListener('click', function() {
+            exportTxt('utf8');
+        });
+        
+        // Export to TXT for Mac (UTF-16)
+        exportTxtMacModal.addEventListener('click', function() {
+            exportTxt('utf16');
+        });
+        
+        // Função para exportar em formato TXT
+        function exportTxt(encoding) {
+            if (!dividedColumns.length) {
+                showAlert('Nenhum dado para exportar. Processe os dados primeiro.', 'error');
+                return;
+            }
+            try {
+                let txtContent = "";
+                const delimiter = "\t";
+                const newline = "\n";
+                
+                // Cabeçalho
+                for (let i = 0; i < dividedColumns.length; i++) {
+                    for (let j = 0; j < currentProcessedHeaders.length; j++) {
+                        txtContent += `${currentProcessedHeaders[j]} (Col ${i+1})${delimiter}`;
+                    }
+                }
+                txtContent = txtContent.slice(0, -1) + newline; // Remove último delimitador e adiciona nova linha
+                
+                // Dados
+                const maxRows = Math.max(...dividedColumns.map(col => col.length));
+                for (let row = 0; row < maxRows; row++) {
+                    let rowContent = "";
+                    for (let col = 0; col < dividedColumns.length; col++) {
+                        if (row < dividedColumns[col].length) {
+                            const rowData = dividedColumns[col][row];
+                            for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
+                                if (cell < rowData.length) {
+                                    rowContent += (rowData[cell] || "") + delimiter;
+                                } else {
+                                    rowContent += delimiter;
+                                }
+                            }
+                        } else {
+                            // Preencher com delimitadores vazios para todas as células desta coluna
+                            for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
+                                rowContent += delimiter;
+                            }
+                        }
+                    }
+                    // Remove o último delimitador da linha
+                    rowContent = rowContent.slice(0, -1);
+                    txtContent += rowContent + newline;
+                }
+                
+                let blob;
+                if (encoding === 'utf16') {
+                    // Converter para UTF-16 (Little Endian)
+                    const buffer = new ArrayBuffer(txtContent.length * 2);
+                    const view = new Uint16Array(buffer);
+                    for (let i = 0; i < txtContent.length; i++) {
+                        view[i] = txtContent.charCodeAt(i);
+                    }
+                    blob = new Blob([new Uint8Array(buffer)], { type: 'text/plain;charset=utf-16le' });
+                } else {
+                    // UTF-8
+                    blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+                }
+                
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = encoding === 'utf16' 
+                    ? `${fileName.replace(/\.[^/.]+$/, "")}_mac.txt` 
+                    : `${fileName.replace(/\.[^/.]+$/, "")}_pc.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                closeModalHandler();
+                
+                window.scrollTo(0, 0);
+                
+                if (confirm('Exportação concluída com sucesso! Deseja limpar os dados atuais?')) {
+                    resetProcess();
+                }
+            } catch (error) {
+                console.error('Erro ao exportar para TXT:', error);
+                showAlert('Erro ao exportar para TXT. Tente novamente.', 'error');
+            }
+        }
+        
+        // Atualizar histórico
+        function updateHistory() {
+            historyList.innerHTML = '';
+            
+            userState.history.slice(0, 5).forEach(op => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div>${op.type}</div>
+                    <div>${op.date}</div>
+                    <div>${op.rows} linhas</div>
+                `;
+                historyList.appendChild(item);
+            });
+        }
+        
+        // Botão de reset
+        resetBtn.addEventListener('click', resetProcess);
+        
+        // Botão Minha Conta
+        accountBtn.addEventListener('click', function() {
+            accountName.textContent = userState.name || '-';
+            accountUsername.textContent = userState.username || '-';
+            accountEmail.textContent = userState.email || '-';
+            accountCompany.textContent = userState.company || '-';
+            accountPhone.textContent = userState.phone || '-';
+            accountCountry.textContent = userState.country || '-';
+            
+            accountPlan.textContent = 
+                userState.role === 'free' ? 'Gratuito' : 
+                userState.role === 'basic' ? 'Básico' : 'Premium';
+            
+            accountStatus.textContent = 'Ativo';
+            
+            const startDate = userState.startDate ? new Date(userState.startDate) : new Date();
+            accountStartDate.textContent = startDate.toLocaleDateString('pt-BR');
+            
+            const nextPayment = new Date(startDate);
+            nextPayment.setMonth(nextPayment.getMonth() + 1);
+            accountNextPayment.textContent = nextPayment.toLocaleDateString('pt-BR');
+            
+            accountOperations.textContent = userState.operationsUsed;
+            
+            const limit = userState.role === 'premium' ? 'Ilimitado' : PLAN_LIMITS[userState.role].operations;
+            accountOperationsLimit.textContent = limit;
+            
+            accountTotalOperations.textContent = userState.totalOperations;
+            
+            const lastAccess = userState.lastLogin ? new Date(userState.lastLogin) : new Date();
+            accountLastAccess.textContent = lastAccess.toLocaleString('pt-BR');
+            
+            accountModal.style.display = 'flex';
+        });
+        
+        // Fechar modal Minha Conta
+        closeAccountModal.addEventListener('click', function() {
+            accountModal.style.display = 'none';
+        });
+        
+        // Atualizar plano na conta
+        upgradeAccountBtn.addEventListener('click', function() {
+            accountModal.style.display = 'none';
+            paymentModal.style.display = 'flex';
+        });
+        
+        // Downgrade para gratuito
+        downgradeAccountBtn.addEventListener('click', function() {
+            if (confirm('Tem certeza que deseja fazer downgrade para o plano gratuito?')) {
+                const users = JSON.parse(localStorage.getItem('planilhaProUsers')) || [];
+                const userIndex = users.findIndex(user => user.email === userState.email);
+                
+                if (userIndex !== -1) {
+                    users[userIndex].plan = 'free';
+                    localStorage.setItem('planilhaProUsers', JSON.stringify(users));
+                    const currentUser = JSON.parse(localStorage.getItem('planilhaProCurrentUser'));
+                    currentUser.plan = 'free';
+                    localStorage.setItem('planilhaProCurrentUser', JSON.stringify(currentUser));
+                    
+                    userState.role = 'free';
+                    
+                    userBadgeElement.textContent = 'Gratuito';
+                    userBadgeElement.className = 'user-badge free-badge';
+                    
+                    updateUIForPlan();
+                    
+                    showAlert('Seu plano foi alterado para Gratuito com sucesso!', 'success');
+                    accountModal.style.display = 'none';
+                }
+            }
+        });
+        
+        // Cancelar assinatura
+        cancelAccountBtn.addEventListener('click', function() {
+            cancelSubscriptionModal.style.display = 'flex';
+            accountModal.style.display = 'none';
+        });
+        
+        // Cancelar cancelamento de assinatura
+        cancelSubscriptionCancel.addEventListener('click', function() {
+            cancelSubscriptionModal.style.display = 'none';
+        });
+        
+        // Confirmar cancelamento de assinatura
+        cancelSubscriptionConfirm.addEventListener('click', function() {
+            const users = JSON.parse(localStorage.getItem('planilhaProUsers')) || [];
+            const userIndex = users.findIndex(user => user.email === userState.email);
+            
+            if (userIndex !== -1) {
+                users[userIndex].plan = 'free';
+                localStorage.setItem('planilhaProUsers', JSON.stringify(users));
+                const currentUser = JSON.parse(localStorage.getItem('planilhaProCurrentUser'));
+                currentUser.plan = 'free';
+                localStorage.setItem('planilhaProCurrentUser', JSON.stringify(currentUser));
+                
+                userState.role = 'free';
+                
+                userBadgeElement.textContent = 'Gratuito';
+                userBadgeElement.className = 'user-badge free-badge';
+                
+                updateUIForPlan();
+                
+                showAlert('Sua assinatura foi cancelada. Agora você está no plano gratuito.', 'success');
+            }
+            
+            cancelSubscriptionModal.style.display = 'none';
+        });
+        
+        // Funções para controle dos modos de operação
+        function updateModeDisplay() {
+            // Remover seleção de todos os modos
+            divisionModeOption.classList.remove('selected');
+            numberingModeOption.classList.remove('selected');
+            bothModeOption.classList.remove('selected');
+            
+            // Esconder todas as seções
+            divisionSection.style.display = 'none';
+            numberingSection.style.display = 'none';
+            bothSection.style.display = 'none';
+            
+            // Ativar modo selecionado
+            if (currentMode === 'division') {
+                divisionModeOption.classList.add('selected');
+                divisionSection.style.display = 'block';
+                // Mostrar seção de arquivo
+                fileSection.classList.remove('hidden');
+            } else if (currentMode === 'numbering') {
+                numberingModeOption.classList.add('selected');
+                numberingSection.style.display = 'block';
+                // Ocultar seção de arquivo
+                fileSection.classList.add('hidden');
+            } else if (currentMode === 'both') {
+                bothModeOption.classList.add('selected');
+                bothSection.style.display = 'block';
+                // Mostrar seção de arquivo
+                fileSection.classList.remove('hidden');
+            }
+        }
+        
+        // Event listeners para mudança de modo
+        divisionModeOption.addEventListener('click', function() {
+            currentMode = 'division';
+            updateModeDisplay();
+        });
+        
+        numberingModeOption.addEventListener('click', function() {
+            currentMode = 'numbering';
+            updateModeDisplay();
+        });
+        
+        bothModeOption.addEventListener('click', function() {
+            currentMode = 'both';
+            updateModeDisplay();
+        });
+        
+        // Ativar numeração automática por padrão no modo numeração
+        autoNumberEnabled.checked = true;
+        autoNumberConfig.style.display = 'block';
+        autoNumberToggle.classList.add('selected');
+        
+        // Ativar numeração automática por padrão no modo ambos
+        bothAutoNumberEnabled.checked = true;
+        bothAutoNumberConfig.style.display = 'block';
+        
+        // Adicionar evento para quando o documento carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            populateColumnSelects([]);
+        });
+    </script>
+</body>
+</html>
