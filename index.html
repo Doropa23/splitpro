@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlanilhaPro - Sistema de Divisão de Planilhas</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -714,6 +715,7 @@
             justify-content: flex-end;
             gap: 12px;
             border-top: 1px solid var(--border);
+            flex-wrap: wrap;
         }
         
         .modal-btn {
@@ -739,6 +741,12 @@
         #exportExcelModal {
             background: var(--success);
             border-color: var(--success);
+            color: white;
+        }
+        
+        #exportCsvModal {
+            background: #f39c12;
+            border-color: #f39c12;
             color: white;
         }
         
@@ -1046,12 +1054,124 @@
             font-size: 0.9rem;
         }
         
-        .compact-group input {
+        .compact-group input, .compact-group select {
             width: 100%;
             padding: 10px;
             border: 1px solid #e1ecfb;
             border-radius: var(--radius-sm);
             background: white;
+        }
+        
+        /* Opções de preenchimento */
+        .fill-options {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: var(--radius-sm);
+            border: 1px solid #e1ecfb;
+        }
+        
+        .fill-options h4 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .fill-method-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .fill-method {
+            flex: 1;
+            min-width: 180px;
+            background: white;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .fill-method:hover {
+            border-color: var(--secondary);
+        }
+        
+        .fill-method.selected {
+            border-color: var(--secondary);
+            background: #e3f0ff;
+        }
+        
+        .fill-method input[type="radio"] {
+            margin-right: 8px;
+        }
+        
+        /* Opções de numeração aleatória */
+        .random-options {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--secondary);
+        }
+        
+        .random-options h4 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .random-type-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .random-type {
+            flex: 1;
+            min-width: 120px;
+            background: white;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .random-type:hover {
+            border-color: var(--secondary);
+        }
+        
+        .random-type.selected {
+            border-color: var(--secondary);
+            background: #e3f0ff;
+        }
+        
+        .random-type input[type="radio"] {
+            margin-right: 8px;
+        }
+        
+        .random-length {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .random-length input {
+            width: 80px;
+        }
+        
+        /* Checkbox para habilitar numeração aleatória */
+        .random-toggle {
+            margin-bottom: 15px;
         }
         
         /* Responsividade */
@@ -1130,6 +1250,18 @@
             .compact-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .fill-method-group {
+                flex-direction: column;
+            }
+            
+            .random-type-group {
+                flex-direction: column;
+            }
+            
+            .random-length {
+                flex-wrap: wrap;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1200,8 +1332,6 @@
             <button class="login-btn" id="loginButton">
                 <i class="fas fa-sign-in-alt"></i> Entrar no Sistema
             </button>
-            
-            
         </div>
     </div>
     
@@ -1221,7 +1351,6 @@
         
         <header>
             <h1 style="margin-top: 20px;"><i class="fas fa-file-excel"></i> Divisor de Planilhas</h1>
-            <p class="subtitle">Carregue uma planilha Excel ou gere números diretamente</p>
         </header>
         
         <div class="card">
@@ -1244,10 +1373,10 @@
             </div>
             
             <div class="form-group" id="fileSection">
-                <label>Selecione seu arquivo Excel:</label>
+                <label>Selecione seu arquivo:</label>
                 <div class="file-container">
                     <div class="file-input-wrapper">
-                        <input type="file" id="fileInput" accept=".xlsx, .xls">
+                        <input type="file" id="fileInput" accept=".xlsx, .xls, .csv, .txt, .tsv, .ods, .numbers">
                         <div class="file-input-button">
                             <i class="fas fa-cloud-upload-alt"></i> Escolher Arquivo
                         </div>
@@ -1351,11 +1480,40 @@
                             </div>
                         </div>
                         
-                        <div style="font-size: 0.85rem; color: #6c7a89; margin-top: 10px;">
-                            <i class="fas fa-info-circle"></i> O campo "Dígitos" preenche com zeros à esquerda
+                        <!-- Opções de Numeração Aleatória -->
+                        <div class="random-options">
+                            <h4><i class="fas fa-random"></i> Numeração Aleatória</h4>
+                            <div class="random-toggle header-toggle">
+                                <input type="checkbox" id="useRandomNumbers">
+                                <label for="useRandomNumbers">Usar numeração aleatória</label>
+                            </div>
+                            <div id="randomConfig" style="display: none;">
+                                <div class="random-type-group">
+                                    <label class="random-type" id="randomNumbersType">
+                                        <input type="radio" name="randomType" value="numbers"> Apenas Números
+                                    </label>
+                                    <label class="random-type" id="randomLettersType">
+                                        <input type="radio" name="randomType" value="letters"> Apenas Letras
+                                    </label>
+                                    <label class="random-type" id="randomMixedType">
+                                        <input type="radio" name="randomType" value="mixed"> Números e Letras
+                                    </label>
+                                </div>
+                                <div class="random-length">
+                                    <label for="randomLength">Tamanho:</label>
+                                    <input type="number" id="randomLength" min="1" max="20" value="6">
+                                </div>
+                                <div style="font-size: 0.85rem; color: #6c7a89; margin-top: 10px;">
+                                    <i class="fas fa-info-circle"></i> A numeração aleatória será gerada ao clicar em "Processar"
+                                </div>
+                            </div>
                         </div>
                         
-                        <!-- Adicionar Colunas Especiais: QR Code e Código de Barras -->
+                        <div style="font-size: 0.85rem; color: #6c7a89; margin-top: 10px;">
+                            <i class="fas fa-info-circle"></i> O campo "Dígitos" preenche com zeros à esquerda (não se aplica a aleatório)
+                        </div>
+                        
+                        <!-- Adicionar Colunas Especiais -->
                         <div class="add-columns-container">
                             <div class="add-column">
                                 <h4><i class="fas fa-barcode"></i> Código de Barras</h4>
@@ -1386,6 +1544,21 @@
                                         <option value="auto">Numeração Automática</option>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Opções de Preenchimento -->
+                        <div class="fill-options">
+                            <h4><i class="fas fa-fill"></i> Opções de Preenchimento</h4>
+                            <div class="fill-method-group">
+                                <label class="fill-method" id="verticalFillMethod">
+                                    <input type="radio" name="fillMethod" value="vertical" checked>
+                                    <i class="fas fa-arrow-down"></i> Vertical (Coluna a Coluna)
+                                </label>
+                                <label class="fill-method" id="horizontalFillMethod">
+                                    <input type="radio" name="fillMethod" value="horizontal">
+                                    <i class="fas fa-arrow-right"></i> Horizontal (Linha a Linha)
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -1477,6 +1650,21 @@
                         <div style="font-size: 0.85rem; color: #6c7a89; margin-top: 10px;">
                             <i class="fas fa-info-circle"></i> O campo "Dígitos" preenche com zeros à esquerda
                         </div>
+                        
+                        <!-- Opções de Preenchimento para o modo Ambos -->
+                        <div class="fill-options">
+                            <h4><i class="fas fa-fill"></i> Opções de Preenchimento</h4>
+                            <div class="fill-method-group">
+                                <label class="fill-method" id="bothVerticalFillMethod">
+                                    <input type="radio" name="bothFillMethod" value="vertical" checked>
+                                    <i class="fas fa-arrow-down"></i> Vertical (Coluna a Coluna)
+                                </label>
+                                <label class="fill-method" id="bothHorizontalFillMethod">
+                                    <input type="radio" name="bothFillMethod" value="horizontal">
+                                    <i class="fas fa-arrow-right"></i> Horizontal (Linha a Linha)
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -1564,7 +1752,7 @@
             <h3><i class="fas fa-info-circle"></i> Como usar este sistema:</h3>
             <ul>
                 <li>Selecione um modo de operação: Divisão de Colunas, Numeração Automática ou Ambos</li>
-                <li>Carregue um arquivo Excel ou gere números automaticamente</li>
+                <li>Carregue um arquivo (Excel, CSV, TXT, ODS, Numbers) ou gere números automaticamente</li>
                 <li>Configure as opções específicas para cada modo</li>
                 <li>Clique em "Processar" para gerar o resultado</li>
                 <li>Exporte para diferentes formatos para uso no InDesign/CorelDraw</li>
@@ -1593,13 +1781,16 @@
             </div>
             <div class="modal-footer">
                 <button class="modal-btn" id="exportExcelModal">
-                    <i class="fas fa-file-excel"></i> Exportar para Excel
+                    <i class="fas fa-file-excel"></i> Exportar XLSX
+                </button>
+                <button class="modal-btn" id="exportCsvModal">
+                    <i class="fas fa-file-csv"></i> Exportar CSV
                 </button>
                 <button class="modal-btn" id="exportTxtModal">
-                    <i class="fas fa-file-alt"></i> Exportar para TXT (PC)
+                    <i class="fas fa-file-alt"></i> Exportar TXT (PC)
                 </button>
                 <button class="modal-btn" id="exportTxtMacModal">
-                    <i class="fas fa-file-alt"></i> Exportar para TXT (Mac)
+                    <i class="fas fa-file-alt"></i> Exportar TXT (Mac)
                 </button>
                 <button class="modal-btn" id="closeModalBtn">
                     <i class="fas fa-times"></i> Fechar
@@ -1688,6 +1879,7 @@
         const closeModal = document.querySelector('.close-modal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const exportExcelModal = document.getElementById('exportExcelModal');
+        const exportCsvModal = document.getElementById('exportCsvModal');
         const exportTxtModal = document.getElementById('exportTxtModal');
         const exportTxtMacModal = document.getElementById('exportTxtMacModal');
         const resetBtn = document.getElementById('resetBtn');
@@ -1743,6 +1935,18 @@
         const barcodeSource = document.getElementById('barcodeSource');
         const qrcodeSource = document.getElementById('qrcodeSource');
         
+        // Novos elementos para preenchimento e numeração aleatória
+        const verticalFillMethod = document.getElementById('verticalFillMethod');
+        const horizontalFillMethod = document.getElementById('horizontalFillMethod');
+        const bothVerticalFillMethod = document.getElementById('bothVerticalFillMethod');
+        const bothHorizontalFillMethod = document.getElementById('bothHorizontalFillMethod');
+        const useRandomNumbers = document.getElementById('useRandomNumbers');
+        const randomConfig = document.getElementById('randomConfig');
+        const randomNumbersType = document.getElementById('randomNumbersType');
+        const randomLettersType = document.getElementById('randomLettersType');
+        const randomMixedType = document.getElementById('randomMixedType');
+        const randomLength = document.getElementById('randomLength');
+        
         // Elementos de login
         const loginContainer = document.getElementById('loginContainer');
         const appContainer = document.getElementById('appContainer');
@@ -1750,6 +1954,47 @@
         const username = document.getElementById('username');
         const password = document.getElementById('password');
         const logoutBtn = document.getElementById('logoutBtn');
+        
+        // Mostrar/esconder configurações de numeração aleatória
+        useRandomNumbers.addEventListener('change', function() {
+            if (this.checked) {
+                randomConfig.style.display = 'block';
+            } else {
+                randomConfig.style.display = 'none';
+            }
+        });
+        
+        // Função para gerar números aleatórios
+        function generateRandomNumbers(count, length, type) {
+            const numbers = [];
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const digits = '0123456789';
+            let charset = '';
+            
+            switch(type) {
+                case 'numbers':
+                    charset = digits;
+                    break;
+                case 'letters':
+                    charset = letters;
+                    break;
+                case 'mixed':
+                    charset = letters + digits;
+                    break;
+                default:
+                    charset = digits;
+            }
+            
+            for (let i = 0; i < count; i++) {
+                let result = '';
+                for (let j = 0; j < length; j++) {
+                    result += charset.charAt(Math.floor(Math.random() * charset.length));
+                }
+                numbers.push([result]);
+            }
+            
+            return numbers;
+        }
         
         // Função para mostrar alertas personalizados
         function showAlert(message, type = 'info') {
@@ -1940,6 +2185,10 @@
             document.getElementById('bothAddBarcode').checked = false;
             document.getElementById('bothAddQrcode').checked = false;
             
+            // Limpar configurações de numeração aleatória
+            document.getElementById('useRandomNumbers').checked = false;
+            randomConfig.style.display = 'none';
+            
             // Resetar selects para opção padrão
             if (barcodeSource.options.length > 0) barcodeSource.selectedIndex = 0;
             if (qrcodeSource.options.length > 0) qrcodeSource.selectedIndex = 0;
@@ -2046,6 +2295,75 @@
             return '';
         }
         
+        // Função para carregar arquivo CSV/TXT
+        function loadTextFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    const delimiter = file.name.endsWith('.csv') || file.name.endsWith('.tsv') ? 
+                        (file.name.endsWith('.tsv') ? '\t' : ',') : '\t';
+                    
+                    PapaParse.parse(content, {
+                        delimiter: delimiter,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            processLoadedData(results.data, file.name);
+                        },
+                        error: function(error) {
+                            console.error('Erro ao processar CSV:', error);
+                            showAlert('Erro ao processar o arquivo. Verifique o formato.', 'error');
+                        }
+                    });
+                } catch (error) {
+                    console.error('Erro ao processar o arquivo:', error);
+                    showAlert('Erro ao processar o arquivo. Certifique-se de que é um arquivo válido.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // Função para processar dados carregados
+        function processLoadedData(jsonData, name) {
+            fullData = jsonData;
+            fileName = name;
+            
+            hasHeader = hasHeaderCheckbox.checked;
+            
+            if (hasHeader && jsonData.length > 0) {
+                originalHeaders = jsonData[0].map(h => h || `Coluna ${jsonData[0].indexOf(h) + 1}`);
+                rawData = jsonData.slice(1);
+            } else {
+                originalHeaders = [];
+                rawData = jsonData;
+            }
+            
+            rawData = rawData.filter(row => row.length > 0 && row.some(cell => cell !== null && cell !== ''));
+            
+            rowCountElement.textContent = rawData.length;
+            fileNameElement.textContent = fileName;
+            
+            let maxCols = 0;
+            for (let row of rawData) {
+                if (row.length > maxCols) maxCols = row.length;
+            }
+            
+            originalColumns = maxCols;
+            
+            if (originalHeaders.length === 0) {
+                originalHeaders = Array.from({length: maxCols}, (_, i) => `Coluna ${i+1}`);
+            }
+            
+            populateColumnSelects(originalHeaders);
+            
+            confirmFileName.textContent = fileName;
+            fileConfirmModal.style.display = 'flex';
+            
+            headerToggle.style.display = 'flex';
+            
+            updateFileButton();
+        }
+        
         // Handle file selection
         function loadFile(file) {
             if (!file) return;
@@ -2054,70 +2372,40 @@
                 resetProcess();
             }
             
-            fileName = file.name;
-            fileNameElement.textContent = file.name;
-            const reader = new FileReader();
+            const fileExt = file.name.split('.').pop().toLowerCase();
             
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    
-                    // Usar raw: true para manter os valores originais
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: true});
-                    
-                    fullData = jsonData;
-                    
-                    hasHeader = hasHeaderCheckbox.checked;
-                    
-                    if (hasHeader && jsonData.length > 0) {
-                        originalHeaders = jsonData[0].map(h => h || `Coluna ${jsonData[0].indexOf(h) + 1}`);
-                        rawData = jsonData.slice(1);
-                    } else {
-                        originalHeaders = [];
-                        rawData = jsonData;
+            if (fileExt === 'csv' || fileExt === 'txt' || fileExt === 'tsv') {
+                loadTextFile(file);
+            } else {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        
+                        // Usar raw: true para manter os valores originais
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: true});
+                        
+                        processLoadedData(jsonData, file.name);
+                        
+                    } catch (error) {
+                        console.error('Erro ao processar o arquivo:', error);
+                        showAlert('Erro ao processar o arquivo. Certifique-se de que é um arquivo válido.', 'error');
+                        rowCountElement.textContent = '0';
+                        fileNameElement.textContent = 'Erro ao carregar arquivo';
+                        rawData = [];
+                        headerToggle.style.display = 'none';
+                        
+                        updateFileButton();
                     }
-                    
-                    rawData = rawData.filter(row => row.length > 0 && row.some(cell => cell !== null && cell !== ''));
-                    
-                    rowCountElement.textContent = rawData.length;
-                    
-                    let maxCols = 0;
-                    for (let row of rawData) {
-                        if (row.length > maxCols) maxCols = row.length;
-                    }
-                    
-                    originalColumns = maxCols;
-                    
-                    if (originalHeaders.length === 0) {
-                        originalHeaders = Array.from({length: maxCols}, (_, i) => `Coluna ${i+1}`);
-                    }
-                    
-                    populateColumnSelects(originalHeaders);
-                    
-                    confirmFileName.textContent = fileName;
-                    fileConfirmModal.style.display = 'flex';
-                    
-                    headerToggle.style.display = 'flex';
-                    
-                    updateFileButton();
-                    
-                } catch (error) {
-                    console.error('Erro ao processar o arquivo:', error);
-                    showAlert('Erro ao processar o arquivo. Certifique-se de que é um arquivo Excel válido.', 'error');
-                    rowCountElement.textContent = '0';
-                    fileNameElement.textContent = 'Erro ao carregar arquivo';
-                    rawData = [];
-                    headerToggle.style.display = 'none';
-                    
-                    updateFileButton();
-                }
-            };
-            
-            reader.readAsArrayBuffer(file);
+                };
+                
+                reader.readAsArrayBuffer(file);
+            }
         }
         
         // Atualizar contador de linhas quando o checkbox for alterado
@@ -2209,6 +2497,7 @@
             if (isPreview) {
                 document.querySelector('.modal-header h2').innerHTML = '<i class="fas fa-table"></i> Visualização do Arquivo Carregado';
                 document.getElementById('exportExcelModal').style.display = 'none';
+                document.getElementById('exportCsvModal').style.display = 'none';
                 document.getElementById('exportTxtModal').style.display = 'none';
                 document.getElementById('exportTxtMacModal').style.display = 'none';
                 
@@ -2216,6 +2505,7 @@
             } else {
                 document.querySelector('.modal-header h2').innerHTML = '<i class="fas fa-table"></i> Visualização da Tabela Dividida';
                 document.getElementById('exportExcelModal').style.display = 'flex';
+                document.getElementById('exportCsvModal').style.display = 'flex';
                 document.getElementById('exportTxtModal').style.display = 'flex';
                 document.getElementById('exportTxtMacModal').style.display = 'flex';
                 
@@ -2303,7 +2593,7 @@
             const hasFile = rawData.length > 0;
             
             if (currentMode === 'division' && !hasFile) {
-                showAlert('Para o modo Divisão de Colunas, você deve carregar um arquivo Excel.', 'error');
+                showAlert('Para o modo Divisão de Colunas, você deve carregar um arquivo.', 'error');
                 return;
             }
             
@@ -2371,17 +2661,27 @@
             const digits = parseInt(numberDigits.value) || 0;
             const numCols = parseInt(numberingNumColumns.value) || 4;
             
-            const numbers = [];
-            for (let i = 0; i < count; i++) {
-                let num = start + i * step;
-                let numStr = num.toString();
-                if (digits > 0 && numStr.length < digits) {
-                    numStr = numStr.padStart(digits, '0');
+            // Verificar se é numeração aleatória
+            const useRandom = useRandomNumbers.checked;
+            let numbers = [];
+            
+            if (useRandom) {
+                const randomType = document.querySelector('input[name="randomType"]:checked')?.value || 'numbers';
+                const length = parseInt(randomLength.value) || 6;
+                numbers = generateRandomNumbers(count, length, randomType);
+                showAlert(`${count} números aleatórios gerados!`, 'success');
+            } else {
+                for (let i = 0; i < count; i++) {
+                    let num = start + i * step;
+                    let numStr = num.toString();
+                    if (digits > 0 && numStr.length < digits) {
+                        numStr = numStr.padStart(digits, '0');
+                    }
+                    numbers.push([prefix + numStr + suffix]);
                 }
-                numbers.push([prefix + numStr + suffix]);
             }
             
-            numberingData = numbers; // Armazenar os números gerados
+            numberingData = numbers;
             
             // Processar dados para adicionar colunas especiais
             let processedData = [...numberingData];
@@ -2409,11 +2709,31 @@
                 processedHeaders.push('#QR Code');
             }
             
-            // Dividir em colunas
-            dividedColumns = splitByColumnCount(processedData, numCols);
+            // Verificar método de preenchimento
+            const fillMethod = document.querySelector('input[name="fillMethod"]:checked')?.value || 'vertical';
+            
+            // Dividir em colunas baseado no método de preenchimento
+            if (fillMethod === 'vertical') {
+                dividedColumns = splitByColumnCount(processedData, numCols);
+            } else {
+                dividedColumns = splitByRowCountHorizontal(processedData, numCols);
+            }
+            
             currentProcessedHeaders = processedHeaders;
 
             displayResults(processedData.length, numCols, dividedColumns, []);
+        }
+        
+        // Função para preenchimento horizontal (linha a linha)
+        function splitByRowCountHorizontal(data, columnCount) {
+            const columns = Array.from({ length: columnCount }, () => []);
+            
+            for (let i = 0; i < data.length; i++) {
+                const colIndex = i % columnCount;
+                columns[colIndex].push(data[i]);
+            }
+            
+            return columns;
         }
         
         function processBothMode() {
@@ -2473,6 +2793,7 @@
             
             // Processar divisão
             const splitMethod = document.querySelector('input[name="bothSplitMethod"]:checked').value;
+            const fillMethod = document.querySelector('input[name="bothFillMethod"]:checked')?.value || 'vertical';
             let numCols;
             let ranges = [];
             
@@ -2482,7 +2803,11 @@
                     showAlert('Número de colunas deve ser maior que zero.', 'error');
                     return;
                 }
-                dividedColumns = splitByColumnCount(processedData, numCols);
+                if (fillMethod === 'vertical') {
+                    dividedColumns = splitByColumnCount(processedData, numCols);
+                } else {
+                    dividedColumns = splitByRowCountHorizontal(processedData, numCols);
+                }
             } else if (splitMethod === 'rows') {
                 const rowsPerCol = parseInt(bothRowsPerColumn.value) || 10;
                 if (rowsPerCol < 1) {
@@ -2490,7 +2815,11 @@
                     return;
                 }
                 numCols = Math.ceil(processedData.length / rowsPerCol);
-                dividedColumns = splitByRowCount(processedData, rowsPerCol);
+                if (fillMethod === 'vertical') {
+                    dividedColumns = splitByRowCount(processedData, rowsPerCol);
+                } else {
+                    dividedColumns = splitByRowCountHorizontal(processedData, numCols);
+                }
             } else if (splitMethod === 'manual') {
                 const manualInput = bothManualDistribution.value;
                 const parts = manualInput.split(',').map(Number).filter(n => !isNaN(n) && n > 0);
@@ -2498,11 +2827,16 @@
                     showAlert("Por favor, insira números válidos separados por vírgulas.", 'error');
                     return;
                 }
-                dividedColumns = splitManual(processedData, parts);
+                if (fillMethod === 'vertical') {
+                    dividedColumns = splitManual(processedData, parts);
+                } else {
+                    // Para distribuição manual horizontal, precisamos reorganizar
+                    dividedColumns = splitManualHorizontal(processedData, parts);
+                }
                 numCols = dividedColumns.length;
             }
             
-            if (numberingData.length > 0) {
+            if (numberingData.length > 0 && fillMethod === 'vertical') {
                 let currentIndex = 0;
                 ranges = [];
                 
@@ -2520,6 +2854,29 @@
             
             currentProcessedHeaders = processedHeaders;
             displayResults(processedData.length, numCols, dividedColumns, ranges);
+        }
+        
+        // Split manual horizontal
+        function splitManualHorizontal(data, distribution) {
+            const columns = Array.from({ length: distribution.length }, () => []);
+            let dataIndex = 0;
+            
+            for (let col = 0; col < distribution.length; col++) {
+                for (let row = 0; row < distribution[col]; row++) {
+                    if (dataIndex < data.length) {
+                        columns[col].push(data[dataIndex]);
+                        dataIndex++;
+                    }
+                }
+            }
+            
+            // Adicionar dados restantes à última coluna
+            while (dataIndex < data.length) {
+                columns[columns.length - 1].push(data[dataIndex]);
+                dataIndex++;
+            }
+            
+            return columns;
         }
         
         // View table button
@@ -2722,6 +3079,73 @@
             }
         });
         
+        // Export to CSV
+        exportCsvModal.addEventListener('click', function() {
+            if (!dividedColumns.length) {
+                showAlert('Nenhum dado para exportar. Processe os dados primeiro.', 'error');
+                return;
+            }
+            
+            try {
+                let csvContent = "";
+                const delimiter = ",";
+                const newline = "\n";
+                
+                // Cabeçalho
+                for (let i = 0; i < dividedColumns.length; i++) {
+                    for (let j = 0; j < currentProcessedHeaders.length; j++) {
+                        csvContent += `"${currentProcessedHeaders[j]} (Col ${i+1})"${delimiter}`;
+                    }
+                }
+                csvContent = csvContent.slice(0, -1) + newline;
+                
+                // Dados
+                const maxRows = Math.max(...dividedColumns.map(col => col.length));
+                for (let row = 0; row < maxRows; row++) {
+                    let rowContent = "";
+                    for (let col = 0; col < dividedColumns.length; col++) {
+                        if (row < dividedColumns[col].length) {
+                            const rowData = dividedColumns[col][row];
+                            for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
+                                if (cell < rowData.length) {
+                                    let value = (rowData[cell] || "").toString();
+                                    if (value.includes(delimiter) || value.includes('"') || value.includes('\n')) {
+                                        value = '"' + value.replace(/"/g, '""') + '"';
+                                    }
+                                    rowContent += value + delimiter;
+                                } else {
+                                    rowContent += delimiter;
+                                }
+                            }
+                        } else {
+                            for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
+                                rowContent += delimiter;
+                            }
+                        }
+                    }
+                    rowContent = rowContent.slice(0, -1);
+                    csvContent += rowContent + newline;
+                }
+                
+                const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `${fileName.replace(/\.[^/.]+$/, "")}_dividido.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                closeModalHandler();
+                
+                if (confirm('Exportação concluída com sucesso! Deseja limpar os dados atuais?')) {
+                    resetProcess();
+                }
+            } catch (error) {
+                console.error('Erro ao exportar para CSV:', error);
+                showAlert('Erro ao exportar para CSV. Tente novamente.', 'error');
+            }
+        });
+        
         // Export to TXT from modal (UTF-8)
         exportTxtModal.addEventListener('click', function() {
             exportTxt('utf8');
@@ -2749,7 +3173,7 @@
                         txtContent += `${currentProcessedHeaders[j]} (Col ${i+1})${delimiter}`;
                     }
                 }
-                txtContent = txtContent.slice(0, -1) + newline; // Remove último delimitador e adiciona nova linha
+                txtContent = txtContent.slice(0, -1) + newline;
                 
                 // Dados
                 const maxRows = Math.max(...dividedColumns.map(col => col.length));
@@ -2766,20 +3190,17 @@
                                 }
                             }
                         } else {
-                            // Preencher com delimitadores vazios para todas as células desta coluna
                             for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
                                 rowContent += delimiter;
                             }
                         }
                     }
-                    // Remove o último delimitador da linha
                     rowContent = rowContent.slice(0, -1);
                     txtContent += rowContent + newline;
                 }
                 
                 let blob;
                 if (encoding === 'utf16') {
-                    // Converter para UTF-16 (Little Endian)
                     const buffer = new ArrayBuffer(txtContent.length * 2);
                     const view = new Uint16Array(buffer);
                     for (let i = 0; i < txtContent.length; i++) {
@@ -2787,7 +3208,6 @@
                     }
                     blob = new Blob([new Uint8Array(buffer)], { type: 'text/plain;charset=utf-16le' });
                 } else {
-                    // UTF-8
                     blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
                 }
                 
