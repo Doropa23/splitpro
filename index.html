@@ -2006,6 +2006,9 @@
         const selectAllColumns = document.getElementById('selectAllColumns');
         const applyColumnSelectionBtn = document.getElementById('applyColumnSelectionBtn');
         
+        // Elementos do modo ambos
+        const bothNumberCount = document.getElementById('bothNumberCount');
+        
         // Novos elementos para modos de operação
         const divisionModeOption = document.getElementById('divisionModeOption');
         const numberingModeOption = document.getElementById('numberingModeOption');
@@ -2022,7 +2025,6 @@
         const bothNumColumns = document.getElementById('bothNumColumns');
         const bothRowsPerColumn = document.getElementById('bothRowsPerColumn');
         const bothManualDistribution = document.getElementById('bothManualDistribution');
-        const bothNumberCount = document.getElementById('bothNumberCount');
         const bothNumberPrefix = document.getElementById('bothNumberPrefix');
         const bothNumberSuffix = document.getElementById('bothNumberSuffix');
         const bothStartNumber = document.getElementById('bothStartNumber');
@@ -2054,6 +2056,15 @@
         const username = document.getElementById('username');
         const password = document.getElementById('password');
         const logoutBtn = document.getElementById('logoutBtn');
+        
+        // Função para sincronizar a quantidade de números com o total de linhas no modo "Ambos"
+        function syncBothNumberCountWithRows() {
+            if (currentMode === 'both' && rawData.length > 0) {
+                const rowCount = rawData.length;
+                bothNumberCount.value = rowCount;
+                showAlert(`Quantidade de números ajustada automaticamente para ${rowCount} (total de linhas carregadas).`, 'success');
+            }
+        }
         
         // Mostrar/esconder configurações de numeração aleatória
         useRandomNumbers.addEventListener('change', function() {
@@ -2393,6 +2404,9 @@
             
             showAlert(`${selectedIndices.length} colunas mantidas. ${originalHeaders.length - selectedIndices.length} coluna(s) eliminada(s).`, 'success');
             
+            // Após aplicar seleção de colunas, sincronizar a quantidade de números no modo "Ambos"
+            syncBothNumberCountWithRows();
+            
             return true;
         }
         
@@ -2620,6 +2634,9 @@
             headerToggle.style.display = 'flex';
             
             updateFileButton();
+            
+            // Sincronizar a quantidade de números com o total de linhas no modo "Ambos"
+            syncBothNumberCountWithRows();
         }
         
         // Handle file selection
@@ -2715,6 +2732,9 @@
                 resultContainer.style.display = 'none';
                 viewTableBtn.style.display = 'none';
             }
+            
+            // Sincronizar a quantidade de números com o total de linhas no modo "Ambos"
+            syncBothNumberCountWithRows();
         });
         
         // Preencher selects de colunas
@@ -3009,6 +3029,7 @@
         
         function processBothMode() {
             const addNumbering = bothAutoNumberEnabled.checked;
+            // Usar o valor atualizado do campo bothNumberCount (que já foi sincronizado)
             const count = parseInt(bothNumberCount.value) || 100;
             const prefix = bothNumberPrefix.value || '';
             const suffix = bothNumberSuffix.value || '';
