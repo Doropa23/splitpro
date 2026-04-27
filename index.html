@@ -1174,6 +1174,78 @@
             margin-bottom: 15px;
         }
         
+        /* Estilos para seleção de colunas */
+        .column-selection-section {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: var(--radius-sm);
+            border: 1px solid #e1ecfb;
+        }
+        
+        .column-selection-section h4 {
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .column-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: white;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        
+        .column-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: var(--radius-sm);
+        }
+        
+        .column-checkbox-item:hover {
+            background: #e3f0ff;
+        }
+        
+        .column-checkbox-item input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .column-checkbox-item label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+        
+        .column-select-all {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e1ecfb;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            margin-top: 0;
+        }
+        
         /* Responsividade */
         @media (max-width: 768px) {
             .container {
@@ -1261,6 +1333,10 @@
             
             .random-length {
                 flex-wrap: wrap;
+            }
+            
+            .column-checkboxes {
+                grid-template-columns: 1fr;
             }
         }
         
@@ -1387,6 +1463,24 @@
                     </div>
                 </div>
                 <div id="fileName" class="file-name">Nenhum arquivo selecionado</div>
+                
+                <!-- Seção para gestão de colunas (nova funcionalidade) -->
+                <div class="column-selection-section" id="columnSelectionSection" style="display: none;">
+                    <h4><i class="fas fa-columns"></i> Seleção de Colunas</h4>
+                    <div class="column-select-all">
+                        <input type="checkbox" id="selectAllColumns">
+                        <label for="selectAllColumns">Selecionar todas as colunas</label>
+                        <button type="button" id="applyColumnSelectionBtn" class="btn-small" style="margin-left: auto; padding: 5px 12px;">
+                            <i class="fas fa-check"></i> Aplicar Seleção
+                        </button>
+                    </div>
+                    <div id="columnCheckboxes" class="column-checkboxes">
+                        <!-- As colunas serão adicionadas dinamicamente aqui -->
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px;">
+                        <i class="fas fa-info-circle"></i> Desmarque as colunas que deseja eliminar
+                    </div>
+                </div>
                 
                 <div class="header-toggle" id="headerToggle" style="display: none;">
                     <input type="checkbox" id="hasHeader" checked>
@@ -1838,6 +1932,8 @@
         let processedData = [];
         let processedHeaders = [];
         let currentMode = 'division'; // Modo atual: division, numbering, both
+        let selectedColumns = []; // Índices das colunas selecionadas (para eliminar)
+        let columnSelectionApplied = false; // Flag para saber se a seleção foi aplicada
         
         // Timer de inatividade
         let inactivityTimer;
@@ -1905,6 +2001,10 @@
         const alertConfirm = document.getElementById('alertConfirm');
         const alertIcon = document.getElementById('alertIcon');
         const fileSection = document.getElementById('fileSection');
+        const columnSelectionSection = document.getElementById('columnSelectionSection');
+        const columnCheckboxes = document.getElementById('columnCheckboxes');
+        const selectAllColumns = document.getElementById('selectAllColumns');
+        const applyColumnSelectionBtn = document.getElementById('applyColumnSelectionBtn');
         
         // Novos elementos para modos de operação
         const divisionModeOption = document.getElementById('divisionModeOption');
@@ -2146,6 +2246,156 @@
             }
         }
         
+        // Função para criar checkboxes de seleção de colunas
+        function populateColumnCheckboxes(headers) {
+            columnCheckboxes.innerHTML = '';
+            selectedColumns = [];
+            
+            if (!headers || headers.length === 0) {
+                columnSelectionSection.style.display = 'none';
+                return;
+            }
+            
+            columnSelectionSection.style.display = 'block';
+            
+            // Criar checkbox para cada coluna
+            headers.forEach((header, index) => {
+                const div = document.createElement('div');
+                div.className = 'column-checkbox-item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `col_${index}`;
+                checkbox.value = index;
+                checkbox.checked = true; // Todas selecionadas por padrão
+                checkbox.addEventListener('change', function() {
+                    updateSelectAllCheckbox();
+                });
+                
+                const label = document.createElement('label');
+                label.htmlFor = `col_${index}`;
+                label.textContent = `Coluna ${index + 1}: ${header.length > 50 ? header.substring(0, 50) + '...' : header}`;
+                label.title = header;
+                
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                columnCheckboxes.appendChild(div);
+            });
+            
+            // Atualizar checkbox "Selecionar todas"
+            updateSelectAllCheckbox();
+            
+            // Evento para selecionar/deselecionar todas
+            selectAllColumns.addEventListener('change', function() {
+                const checkboxes = columnCheckboxes.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    cb.checked = selectAllColumns.checked;
+                });
+            });
+        }
+        
+        // Função para atualizar o estado do checkbox "Selecionar todas"
+        function updateSelectAllCheckbox() {
+            const checkboxes = columnCheckboxes.querySelectorAll('input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            const someChecked = Array.from(checkboxes).some(cb => cb.checked);
+            
+            selectAllColumns.checked = allChecked;
+            selectAllColumns.indeterminate = !allChecked && someChecked;
+        }
+        
+        // Função para aplicar a seleção de colunas (eliminar colunas não selecionadas)
+        function applyColumnSelection() {
+            const checkboxes = columnCheckboxes.querySelectorAll('input[type="checkbox"]');
+            const selectedIndices = [];
+            
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    selectedIndices.push(parseInt(cb.value));
+                }
+            });
+            
+            if (selectedIndices.length === 0) {
+                showAlert('Você deve selecionar pelo menos uma coluna para continuar.', 'warning');
+                return false;
+            }
+            
+            // Se todas as colunas estiverem selecionadas, não precisa modificar
+            if (selectedIndices.length === originalHeaders.length) {
+                columnSelectionApplied = false;
+                return true;
+            }
+            
+            // Filtrar os dados: manter apenas as colunas selecionadas
+            // Atualizar cabeçalhos
+            const newHeaders = [];
+            selectedIndices.forEach(idx => {
+                newHeaders.push(originalHeaders[idx]);
+            });
+            originalHeaders = newHeaders;
+            
+            // Atualizar dados (rawData)
+            const newRawData = [];
+            for (let row of rawData) {
+                const newRow = [];
+                selectedIndices.forEach(idx => {
+                    if (idx < row.length) {
+                        newRow.push(row[idx]);
+                    } else {
+                        newRow.push('');
+                    }
+                });
+                newRawData.push(newRow);
+            }
+            rawData = newRawData;
+            
+            // Atualizar fullData também para manter consistência
+            if (hasHeader && fullData.length > 0) {
+                const newFullData = [originalHeaders];
+                for (let i = 1; i < fullData.length; i++) {
+                    const newRow = [];
+                    selectedIndices.forEach(idx => {
+                        if (idx < fullData[i].length) {
+                            newRow.push(fullData[i][idx]);
+                        } else {
+                            newRow.push('');
+                        }
+                    });
+                    newFullData.push(newRow);
+                }
+                fullData = newFullData;
+            } else {
+                const newFullData = [];
+                for (let row of fullData) {
+                    const newRow = [];
+                    selectedIndices.forEach(idx => {
+                        if (idx < row.length) {
+                            newRow.push(row[idx]);
+                        } else {
+                            newRow.push('');
+                        }
+                    });
+                    newFullData.push(newRow);
+                }
+                fullData = newFullData;
+            }
+            
+            // Atualizar contagem de linhas
+            rowCountElement.textContent = rawData.length;
+            
+            // Re-popular selects com os novos cabeçalhos
+            populateColumnSelects(originalHeaders);
+            
+            // Re-popular checkboxes com os novos dados
+            populateColumnCheckboxes(originalHeaders);
+            
+            columnSelectionApplied = true;
+            
+            showAlert(`${selectedIndices.length} colunas mantidas. ${originalHeaders.length - selectedIndices.length} coluna(s) eliminada(s).`, 'success');
+            
+            return true;
+        }
+        
         // Função para limpar todos os campos do formulário
         function clearAllFields() {
             // Limpar campos de numeração automática
@@ -2210,6 +2460,11 @@
             generatedData = [];
             processedData = [];
             processedHeaders = [];
+            columnSelectionApplied = false;
+            selectedColumns = [];
+            
+            // Esconder seção de seleção de colunas
+            columnSelectionSection.style.display = 'none';
             
             document.getElementById('fileInput').value = '';
             document.getElementById('fileName').textContent = 'Nenhum arquivo selecionado';
@@ -2325,27 +2580,27 @@
         
         // Função para processar dados carregados
         function processLoadedData(jsonData, name) {
-            fullData = jsonData;
+            fullData = [...jsonData];
             fileName = name;
             
             hasHeader = hasHeaderCheckbox.checked;
             
             if (hasHeader && jsonData.length > 0) {
-                originalHeaders = jsonData[0].map(h => h || `Coluna ${jsonData[0].indexOf(h) + 1}`);
+                originalHeaders = jsonData[0].map(h => (h !== null && h !== undefined && h !== '') ? String(h) : `Coluna ${jsonData[0].indexOf(h) + 1}`);
                 rawData = jsonData.slice(1);
             } else {
                 originalHeaders = [];
                 rawData = jsonData;
             }
             
-            rawData = rawData.filter(row => row.length > 0 && row.some(cell => cell !== null && cell !== ''));
+            rawData = rawData.filter(row => row && row.length > 0 && row.some(cell => cell !== null && cell !== undefined && cell !== ''));
             
             rowCountElement.textContent = rawData.length;
             fileNameElement.textContent = fileName;
             
             let maxCols = 0;
             for (let row of rawData) {
-                if (row.length > maxCols) maxCols = row.length;
+                if (row && row.length > maxCols) maxCols = row.length;
             }
             
             originalColumns = maxCols;
@@ -2353,6 +2608,9 @@
             if (originalHeaders.length === 0) {
                 originalHeaders = Array.from({length: maxCols}, (_, i) => `Coluna ${i+1}`);
             }
+            
+            // Criar checkboxes para seleção de colunas
+            populateColumnCheckboxes(originalHeaders);
             
             populateColumnSelects(originalHeaders);
             
@@ -2399,6 +2657,7 @@
                         fileNameElement.textContent = 'Erro ao carregar arquivo';
                         rawData = [];
                         headerToggle.style.display = 'none';
+                        columnSelectionSection.style.display = 'none';
                         
                         updateFileButton();
                     }
@@ -2407,6 +2666,15 @@
                 reader.readAsArrayBuffer(file);
             }
         }
+        
+        // Botão para aplicar seleção de colunas
+        applyColumnSelectionBtn.addEventListener('click', function() {
+            if (rawData.length === 0) {
+                showAlert('Nenhum arquivo carregado. Carregue um arquivo primeiro.', 'warning');
+                return;
+            }
+            applyColumnSelection();
+        });
         
         // Atualizar contador de linhas quando o checkbox for alterado
         hasHeaderCheckbox.addEventListener('change', function() {
@@ -2419,25 +2687,27 @@
             if (fullData.length > 0) {
                 hasHeader = this.checked;
                 if (hasHeader) {
-                    originalHeaders = fullData[0].map(h => h || `Coluna ${fullData[0].indexOf(h) + 1}`);
+                    originalHeaders = fullData[0].map(h => (h !== null && h !== undefined && h !== '') ? String(h) : `Coluna ${fullData[0].indexOf(h) + 1}`);
                     rawData = fullData.slice(1);
                 } else {
                     originalHeaders = [];
                     rawData = fullData;
                 }
                 
-                rawData = rawData.filter(row => row.length > 0 && row.some(cell => cell !== null && cell !== ''));
+                rawData = rawData.filter(row => row && row.length > 0 && row.some(cell => cell !== null && cell !== undefined && cell !== ''));
                 
                 rowCountElement.textContent = rawData.length;
                 
                 if (originalHeaders.length === 0) {
                     let maxCols = 0;
                     for (let row of rawData) {
-                        if (row.length > maxCols) maxCols = row.length;
+                        if (row && row.length > maxCols) maxCols = row.length;
                     }
                     originalHeaders = Array.from({length: maxCols}, (_, i) => `Coluna ${i+1}`);
                 }
                 
+                // Atualizar checkboxes com os novos cabeçalhos
+                populateColumnCheckboxes(originalHeaders);
                 populateColumnSelects(originalHeaders);
             }
             
@@ -2471,13 +2741,13 @@
                     // Criar opção para Código de Barras
                     const barcodeOption = document.createElement('option');
                     barcodeOption.value = index.toString();
-                    barcodeOption.textContent = `Coluna ${index + 1}: ${header}`;
+                    barcodeOption.textContent = `Coluna ${index + 1}: ${header.length > 50 ? header.substring(0, 50) + '...' : header}`;
                     barcodeSource.appendChild(barcodeOption.cloneNode(true));
                     
                     // Criar opção para QR Code
                     const qrcodeOption = document.createElement('option');
                     qrcodeOption.value = index.toString();
-                    qrcodeOption.textContent = `Coluna ${index + 1}: ${header}`;
+                    qrcodeOption.textContent = `Coluna ${index + 1}: ${header.length > 50 ? header.substring(0, 50) + '...' : header}`;
                     qrcodeSource.appendChild(qrcodeOption.cloneNode(true));
                     
                     // Criar opções para o modo "Ambos"
@@ -2540,8 +2810,8 @@
                 const rowData = rawData[row];
                 for (let cell = 0; cell < originalHeaders.length; cell++) {
                     const td = document.createElement('td');
-                    if (cell < rowData.length) {
-                        td.textContent = rowData[cell];
+                    if (rowData && cell < rowData.length) {
+                        td.textContent = rowData[cell] !== undefined && rowData[cell] !== null ? rowData[cell] : '';
                     } else {
                         td.innerHTML = '&nbsp;';
                     }
@@ -2564,6 +2834,7 @@
             fileNameElement.textContent = 'Nenhum arquivo selecionado';
             rowCountElement.textContent = '0';
             headerToggle.style.display = 'none';
+            columnSelectionSection.style.display = 'none';
             updateFileButton();
         });
         
@@ -2994,8 +3265,8 @@
                         
                         for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
                             const td = document.createElement('td');
-                            if (cell < rowData.length) {
-                                td.textContent = rowData[cell];
+                            if (rowData && cell < rowData.length) {
+                                td.textContent = rowData[cell] !== undefined && rowData[cell] !== null ? rowData[cell] : '';
                             } else {
                                 td.innerHTML = '&nbsp;';
                             }
@@ -3043,8 +3314,8 @@
                         if (row < dividedColumns[col].length) {
                             const rowCells = dividedColumns[col][row];
                             for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
-                                if (cell < rowCells.length) {
-                                    rowData.push(rowCells[cell]);
+                                if (rowCells && cell < rowCells.length) {
+                                    rowData.push(rowCells[cell] !== undefined && rowCells[cell] !== null ? rowCells[cell] : "");
                                 } else {
                                     rowData.push("");
                                 }
@@ -3107,8 +3378,8 @@
                         if (row < dividedColumns[col].length) {
                             const rowData = dividedColumns[col][row];
                             for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
-                                if (cell < rowData.length) {
-                                    let value = (rowData[cell] || "").toString();
+                                if (rowData && cell < rowData.length) {
+                                    let value = (rowData[cell] !== undefined && rowData[cell] !== null ? rowData[cell] : "").toString();
                                     if (value.includes(delimiter) || value.includes('"') || value.includes('\n')) {
                                         value = '"' + value.replace(/"/g, '""') + '"';
                                     }
@@ -3183,8 +3454,8 @@
                         if (row < dividedColumns[col].length) {
                             const rowData = dividedColumns[col][row];
                             for (let cell = 0; cell < currentProcessedHeaders.length; cell++) {
-                                if (cell < rowData.length) {
-                                    rowContent += (rowData[cell] || "") + delimiter;
+                                if (rowData && cell < rowData.length) {
+                                    rowContent += (rowData[cell] !== undefined && rowData[cell] !== null ? rowData[cell] : "") + delimiter;
                                 } else {
                                     rowContent += delimiter;
                                 }
@@ -3259,6 +3530,8 @@
                 numberingSection.style.display = 'block';
                 // Ocultar seção de arquivo
                 fileSection.classList.add('hidden');
+                // Esconder seção de seleção de colunas no modo numeração
+                columnSelectionSection.style.display = 'none';
             } else if (currentMode === 'both') {
                 bothModeOption.classList.add('selected');
                 bothSection.style.display = 'block';
